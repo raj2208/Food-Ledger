@@ -1,8 +1,9 @@
 import type { ReactNode } from "react";
+import { BottomNav } from "@/components/bottom-nav";
 import { SiteNav } from "@/components/site-nav";
 
-// One continuous gradient band: the nav, plus (on the home page) the day summary.
-// The nav is static so it shows instantly while a page's data streams in.
+// One continuous gradient band: the top bar, plus (on the home page) the day summary.
+// The bars are static so they show instantly while a page's data streams in.
 export function PageShell({ hero, children }: { hero?: ReactNode; children: ReactNode }) {
   return (
     <>
@@ -12,7 +13,9 @@ export function PageShell({ hero, children }: { hero?: ReactNode; children: Reac
           {hero}
         </div>
       </header>
-      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">{children}</main>
+      {/* pb-28 keeps the last content clear of the fixed bottom bar. */}
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 pt-6 pb-28">{children}</main>
+      <BottomNav />
     </>
   );
 }
