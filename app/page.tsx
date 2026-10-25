@@ -22,7 +22,7 @@ import {
 
 export default function Home({ searchParams }: PageProps<"/">) {
   return (
-    <Suspense fallback={<p className="text-sm text-zinc-500">Loading…</p>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
       <Day searchParams={searchParams} />
     </Suspense>
   );
@@ -58,19 +58,19 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
         </Link>
         <div className="text-center">
           <div className="font-semibold">{isToday ? "Today" : day}</div>
-          {isToday ? <div className="text-xs text-zinc-500">{day}</div> : null}
+          {isToday ? <div className="text-xs text-muted-foreground">{day}</div> : null}
         </div>
         <Link href={href(shiftDay(day, 1), meal)} className={ghostButtonClass}>
           Next →
         </Link>
       </nav>
 
-      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+      <section className="rounded-xl border border-border bg-card p-4">
         <div className="text-3xl font-semibold tabular-nums">
           {Math.round(totals.calories)}{" "}
-          <span className="text-base font-normal text-zinc-500">kcal</span>
+          <span className="text-base font-normal text-muted-foreground">kcal</span>
         </div>
-        <div className="mt-1 flex gap-4 text-sm text-zinc-500 tabular-nums">
+        <div className="mt-1 flex gap-4 text-sm text-muted-foreground tabular-nums">
           <span>Protein {Math.round(totals.proteinG)} g</span>
           <span>Carbs {Math.round(totals.carbsG)} g</span>
           <span>Fat {Math.round(totals.fatG)} g</span>
@@ -80,7 +80,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
       <section id="log-food" className="scroll-mt-6">
         <h2 className="mb-3 text-lg font-semibold">Log food</h2>
 
-        <div className="mb-4 flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-900" role="tablist">
+        <div className="mb-4 flex gap-1 rounded-lg bg-muted p-1" role="tablist">
           {MEALS.map((m) => (
             <Link
               key={m.value}
@@ -89,8 +89,8 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
               aria-selected={m.value === meal}
               className={`flex-1 rounded-md px-3 py-1.5 text-center text-sm ${
                 m.value === meal
-                  ? "bg-white font-medium shadow-sm dark:bg-zinc-800"
-                  : "text-zinc-500 hover:text-foreground"
+                  ? "bg-primary font-medium text-primary-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {m.label}
@@ -99,7 +99,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
         </div>
 
         {foods.length === 0 ? (
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted-foreground">
             You haven&apos;t saved any foods yet.{" "}
             <Link href="/foods" className="underline">
               Add one
@@ -110,7 +110,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
           <>
             {frequent.length > 0 ? (
               <div className="mb-5">
-                <div className="mb-2 text-xs font-medium text-zinc-500">
+                <div className="mb-2 text-xs font-medium text-muted-foreground">
                   Quick add · 1 serving
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -131,7 +131,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
             <form action={logFood} className="flex flex-wrap items-end gap-3">
               <input type="hidden" name="day" value={day} />
               <input type="hidden" name="meal" value={meal} />
-              <label className="flex min-w-48 flex-1 flex-col gap-1 text-xs font-medium text-zinc-500">
+              <label className="flex min-w-48 flex-1 flex-col gap-1 text-xs font-medium text-muted-foreground">
                 Food
                 <select name="food_id" required className={inputClass}>
                   {foods.map((f) => (
@@ -141,7 +141,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
                   ))}
                 </select>
               </label>
-              <label className="flex w-28 flex-col gap-1 text-xs font-medium text-zinc-500">
+              <label className="flex w-28 flex-col gap-1 text-xs font-medium text-muted-foreground">
                 Servings
                 <input
                   name="quantity"
@@ -164,7 +164,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
       <section className="flex flex-col gap-6">
         <h2 className="-mb-3 text-lg font-semibold">Eaten</h2>
         {entries.length === 0 ? (
-          <p className="text-sm text-zinc-500">Nothing logged for this day.</p>
+          <p className="text-sm text-muted-foreground">Nothing logged for this day.</p>
         ) : (
           <>
             {MEALS.map((m) => (
@@ -190,14 +190,14 @@ function MealGroup({ title, entries }: { title: string; entries: LogEntry[] }) {
     <div>
       <div className="mb-1 flex items-baseline justify-between">
         <h3 className="text-sm font-semibold">{title}</h3>
-        <span className="text-xs tabular-nums text-zinc-500">{Math.round(kcal)} kcal</span>
+        <span className="text-xs tabular-nums text-muted-foreground">{Math.round(kcal)} kcal</span>
       </div>
-      <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
+      <ul className="flex flex-col divide-y divide-border">
         {entries.map((e) => (
           <li key={e.id} className="flex items-center justify-between gap-4 py-2">
             <div>
               <div>{e.foodName}</div>
-              <div className="text-xs text-zinc-500">
+              <div className="text-xs text-muted-foreground">
                 {e.quantity} × {e.servingLabel}
               </div>
             </div>

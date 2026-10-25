@@ -1,8 +1,8 @@
 import type { Food } from "@/lib/foods";
 
 const input =
-  "w-full rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-sm dark:border-zinc-700";
-const label = "flex flex-col gap-1 text-xs font-medium text-zinc-500";
+  "w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm";
+const label = "flex flex-col gap-1 text-xs font-medium text-muted-foreground";
 
 export function FoodFields({ food }: { food?: Food }) {
   return (
@@ -90,7 +90,7 @@ export function FoodFields({ food }: { food?: Food }) {
 }
 
 export const buttonClass =
-  "rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300";
+  "rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90";
 export const ghostButtonClass =
-  "rounded-md border border-zinc-300 px-3 py-1.5 text-xs hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-900";
+  "rounded-md border border-input px-3 py-1.5 text-xs hover:bg-muted";
 export const inputClass = input;

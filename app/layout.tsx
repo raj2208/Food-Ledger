@@ -34,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          <header className="border-b border-zinc-200 dark:border-zinc-800">
+          <header className="border-b border-border">
             <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
               <Link href="/" className="font-semibold">
                 Food Ledger

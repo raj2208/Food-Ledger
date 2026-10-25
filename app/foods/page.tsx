@@ -26,7 +26,7 @@ export default function FoodsPage() {
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">Your foods</h2>
-        <Suspense fallback={<p className="text-sm text-zinc-500">Loading…</p>}>
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
           <FoodList />
         </Suspense>
       </section>
@@ -38,34 +38,34 @@ async function FoodList() {
   const foods = await listFoods();
   if (foods.length === 0) {
     return (
-      <p className="text-sm text-zinc-500">
+      <p className="text-sm text-muted-foreground">
         Nothing saved yet. Add your first food above.
       </p>
     );
   }
   return (
-    <ul className="flex flex-col divide-y divide-zinc-200 dark:divide-zinc-800">
+    <ul className="flex flex-col divide-y divide-border">
       {foods.map((f) => (
         <li key={f.id} className="py-2">
           <details>
             <summary className="flex cursor-pointer items-baseline justify-between gap-4">
               <span>
                 {f.name}{" "}
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-muted-foreground">
                   · {f.servingLabel} · {f.kind === "packaged" ? "packaged" : "non-packaged"}
                 </span>
               </span>
               <span className="text-sm tabular-nums">{Math.round(f.calories)} kcal</span>
             </summary>
             {f.notes ? (
-              <p className="mt-1 text-xs italic text-zinc-500">{f.notes}</p>
+              <p className="mt-1 text-xs italic text-muted-foreground">{f.notes}</p>
             ) : null}
             <form
               action={updateFood.bind(null, f.id)}
               className="mt-3 flex flex-col gap-3"
             >
               <FoodFields food={f} />
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-muted-foreground">
                 Changes apply to future logs only. Past entries keep the values
                 they were logged with.
               </p>

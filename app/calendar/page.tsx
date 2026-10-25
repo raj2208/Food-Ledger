@@ -15,7 +15,7 @@ export const metadata = { title: "Calendar · Food Ledger" };
 
 export default function CalendarPage({ searchParams }: PageProps<"/calendar">) {
   return (
-    <Suspense fallback={<p className="text-sm text-zinc-500">Loading…</p>}>
+    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
       <Month searchParams={searchParams} />
     </Suspense>
   );
@@ -44,7 +44,7 @@ async function Month({
         </Link>
         <div className="text-center">
           <div className="font-semibold">{monthLabel(current)}</div>
-          <div className="text-xs text-zinc-500">
+          <div className="text-xs text-muted-foreground">
             {loggedDays === 0
               ? "No days logged"
               : `${loggedDays} ${loggedDays === 1 ? "day" : "days"} logged · avg ${Math.round(total / loggedDays)} kcal`}
@@ -55,7 +55,7 @@ async function Month({
         </Link>
       </nav>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-zinc-500">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
         {WEEKDAYS.map((d) => (
           <div key={d}>{d}</div>
         ))}
@@ -70,15 +70,15 @@ async function Month({
             <Link
               key={day}
               href={`/?date=${day}`}
-              className={`flex aspect-square flex-col justify-between rounded-md border p-1.5 text-sm hover:bg-zinc-100 dark:hover:bg-zinc-900 ${
+              className={`flex aspect-square flex-col justify-between rounded-md border p-1.5 text-sm hover:bg-muted ${
                 isToday
-                  ? "border-zinc-900 dark:border-zinc-100"
-                  : "border-zinc-200 dark:border-zinc-800"
+                  ? "border-primary bg-secondary"
+                  : "border-border"
               }`}
             >
               <span className={isToday ? "font-semibold" : ""}>{Number(day.slice(8))}</span>
               {kcal !== undefined ? (
-                <span className="text-[10px] leading-tight tabular-nums text-zinc-500 sm:text-xs">
+                <span className="text-[10px] leading-tight tabular-nums text-muted-foreground sm:text-xs">
                   {Math.round(kcal)}
                   <span className="hidden sm:inline"> kcal</span>
                 </span>

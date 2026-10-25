@@ -3,7 +3,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export function Hero() {
   return (
-    <section className="rounded-xl border bg-muted/40 px-6 py-10 text-center sm:py-14">
+    <section className="rounded-xl border bg-secondary px-6 py-10 text-center sm:py-14">
       <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
         Log it once. Track it forever.
       </h1>
