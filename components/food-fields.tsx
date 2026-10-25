@@ -76,6 +76,15 @@ export function FoodFields({ food }: { food?: Food }) {
         Barcode (optional)
         <input name="barcode" defaultValue={food?.barcode ?? ""} className={input} />
       </label>
+      <label className={`${label} col-span-2 sm:col-span-4`}>
+        Notes (optional)
+        <input
+          name="notes"
+          placeholder="e.g. less oil, from the corner shop"
+          defaultValue={food?.notes ?? ""}
+          className={input}
+        />
+      </label>
     </div>
   );
 }

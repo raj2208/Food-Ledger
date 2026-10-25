@@ -40,6 +40,7 @@ function parseFood(formData: FormData): FoodInput {
     proteinG: number(formData, "protein_g", 0),
     carbsG: number(formData, "carbs_g", 0),
     fatG: number(formData, "fat_g", 0),
+    notes: text(formData, "notes") || null,
   };
 }
 

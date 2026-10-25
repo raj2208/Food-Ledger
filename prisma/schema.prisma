@@ -22,6 +22,7 @@ model Food {
   proteinG     Float      @default(0) @map("protein_g")
   carbsG       Float      @default(0) @map("carbs_g")
   fatG         Float      @default(0) @map("fat_g")
+  notes        String?
   createdAt    DateTime   @default(now()) @map("created_at")
   entries      LogEntry[]
 

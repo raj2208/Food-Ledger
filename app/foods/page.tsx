@@ -57,6 +57,9 @@ async function FoodList() {
               </span>
               <span className="text-sm tabular-nums">{Math.round(f.calories)} kcal</span>
             </summary>
+            {f.notes ? (
+              <p className="mt-1 text-xs italic text-zinc-500">{f.notes}</p>
+            ) : null}
             <form
               action={updateFood.bind(null, f.id)}
               className="mt-3 flex flex-col gap-3"
