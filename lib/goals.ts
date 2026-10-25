@@ -40,11 +40,12 @@ export async function saveGoalsRow(goals: Goals): Promise<void> {
   });
 }
 
-// Rule of thumb: the three meals cover ~90-105% of the day, leaving room for snacks.
+// Rule of thumb share of the day's calories; the midpoints add up to 100%.
 const MEAL_SHARE: Record<MealType, [number, number]> = {
   breakfast: [0.25, 0.3],
-  lunch: [0.35, 0.4],
+  lunch: [0.3, 0.35],
   dinner: [0.3, 0.35],
+  snack: [0.05, 0.1],
 };
 
 const roundTo5 = (n: number) => Math.round(n / 5) * 5;

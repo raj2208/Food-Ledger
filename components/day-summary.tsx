@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { KcalGauge } from "@/components/kcal-gauge";
 import type { Goals } from "@/lib/goals";
 import type { DayTotals } from "@/lib/log";
@@ -54,12 +53,6 @@ export function DaySummary({ totals, goals }: { totals: DayTotals; goals: Goals 
             </div>
           );
         })}
-      </div>
-
-      <div className="mt-4 text-center">
-        <Link href="/goals" className="text-xs underline-offset-2 hover:underline">
-          Edit goals
-        </Link>
       </div>
     </div>
   );

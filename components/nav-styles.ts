@@ -1,8 +1,4 @@
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-
-// Round icon buttons in the nav: translucent so they sit nicely on the gradient band.
-export const navIconButton = cn(
-  buttonVariants({ variant: "outline", size: "icon" }),
-  "relative rounded-full border-transparent bg-white/30 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30",
-);
+// Top-bar icons are just the icon: no circle, no background. The small padding only
+// enlarges the tap area; it is invisible.
+export const navIcon =
+  "inline-flex items-center justify-center rounded-md p-1 outline-none transition-opacity hover:opacity-70 focus-visible:ring-2 focus-visible:ring-current";

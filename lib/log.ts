@@ -11,16 +11,11 @@ export const MEALS: { value: MealType; label: string }[] = [
   { value: "breakfast", label: "Breakfast" },
   { value: "lunch", label: "Lunch" },
   { value: "dinner", label: "Dinner" },
+  { value: "snack", label: "Snack" },
 ];
 
 export function isMeal(s: string): s is MealType {
   return MEALS.some((m) => m.value === s);
-}
-
-// Sensible default for "what am I eating now": before 11 breakfast, before 16 lunch, else dinner.
-export function mealForNow(now = new Date()): MealType {
-  const hour = now.getHours();
-  return hour < 11 ? "breakfast" : hour < 16 ? "lunch" : "dinner";
 }
 
 // Values are per-serving snapshots; totals are per-serving * quantity.

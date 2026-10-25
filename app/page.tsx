@@ -16,7 +16,6 @@ import {
   isValidDay,
   listEntriesForDay,
   listFrequentFoods,
-  mealForNow,
   MEALS,
   shiftDay,
   todayLocal,
@@ -42,22 +41,24 @@ export default function Home({ searchParams }: PageProps<"/">) {
   );
 }
 
-function href(day: string, meal: MealType): string {
-  return `/?date=${day}&meal=${meal}`;
+// `meal` is the card to keep open; leave it out for a page with every card closed.
+function href(day: string, meal?: MealType | null): string {
+  return meal ? `/?date=${day}&meal=${meal}` : `/?date=${day}`;
 }
 
 const navButton =
   "flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground";
 
-// Which day and meal the page is showing. Needs the request time, so it opts out of prerendering.
+// Which day is showing, and which meal card (if any) is open. Every card starts closed.
+// Needs the request time for "today", so it opts out of prerendering.
 async function resolveView(searchParams: Params) {
   await connection();
   const { date, meal: mealParam } = await searchParams;
   const requested = typeof date === "string" ? date : "";
   const day = isValidDay(requested) ? requested : todayLocal();
-  const meal: MealType =
-    typeof mealParam === "string" && isMeal(mealParam) ? mealParam : mealForNow();
-  return { day, meal, isToday: day === todayLocal() };
+  const openMeal: MealType | null =
+    typeof mealParam === "string" && isMeal(mealParam) ? mealParam : null;
+  return { day, openMeal, isToday: day === todayLocal() };
 }
 
 // Rendered inside the gradient band in PageShell.
@@ -68,7 +69,7 @@ async function Summary({ searchParams }: { searchParams: Params }) {
 }
 
 async function Day({ searchParams }: { searchParams: Params }) {
-  const { day, meal, isToday } = await resolveView(searchParams);
+  const { day, openMeal, isToday } = await resolveView(searchParams);
   const [entries, foods, frequent, goals] = await Promise.all([
     listEntriesForDay(day),
     listFoods(),
@@ -80,7 +81,7 @@ async function Day({ searchParams }: { searchParams: Params }) {
   return (
     <div className="flex flex-col gap-6">
       <nav className="flex items-center justify-between">
-        <Link href={href(shiftDay(day, -1), meal)} aria-label="Previous day" className={navButton}>
+        <Link href={href(shiftDay(day, -1), openMeal)} aria-label="Previous day" className={navButton}>
           <ChevronLeft className="size-5" aria-hidden="true" />
         </Link>
         <Link
@@ -90,25 +91,28 @@ async function Day({ searchParams }: { searchParams: Params }) {
           <CalendarDays className="size-4" aria-hidden="true" />
           {dayLabel(day, isToday)}
         </Link>
-        <Link href={href(shiftDay(day, 1), meal)} aria-label="Next day" className={navButton}>
+        <Link href={href(shiftDay(day, 1), openMeal)} aria-label="Next day" className={navButton}>
           <ChevronRight className="size-5" aria-hidden="true" />
         </Link>
       </nav>
 
       <div className="flex flex-col gap-4">
-        {MEALS.map((m) => (
-          <MealCard
-            key={m.value}
-            meal={m.value}
-            title={m.label}
-            recommended={recommendedRange(m.value, goals.calories)}
-            entries={entries.filter((e) => e.meal === m.value)}
-            isOpen={m.value === meal}
-            addHref={href(day, m.value)}
-          >
-            <LogControls day={day} meal={meal} foods={foods} frequent={frequent} />
-          </MealCard>
-        ))}
+        {MEALS.map((m) => {
+          const isOpen = m.value === openMeal;
+          return (
+            <MealCard
+              key={m.value}
+              meal={m.value}
+              title={m.label}
+              recommended={recommendedRange(m.value, goals.calories)}
+              entries={entries.filter((e) => e.meal === m.value)}
+              isOpen={isOpen}
+              toggleHref={href(day, isOpen ? null : m.value)}
+            >
+              <LogControls day={day} meal={m.value} foods={foods} frequent={frequent} />
+            </MealCard>
+          );
+        })}
         {/* Entries logged before meals existed. */}
         {unassigned.length > 0 ? (
           <MealCard meal={null} title="Unassigned" entries={unassigned} />

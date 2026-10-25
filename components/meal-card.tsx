@@ -1,4 +1,4 @@
-import { Coffee, Plus, Salad, Soup, Utensils } from "lucide-react";
+import { Coffee, Cookie, Minus, Plus, Salad, Soup, Utensils } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { deleteEntry } from "@/app/actions";
@@ -6,7 +6,7 @@ import { ghostButtonClass } from "@/components/food-fields";
 import { totalsFor, type LogEntry, type MealType } from "@/lib/log";
 import { cn } from "@/lib/utils";
 
-const ICONS = { breakfast: Coffee, lunch: Salad, dinner: Soup } as const;
+const ICONS = { breakfast: Coffee, lunch: Salad, dinner: Soup, snack: Cookie } as const;
 
 type Props = {
   meal: MealType | null; // null = entries logged before meals existed
@@ -14,13 +14,45 @@ type Props = {
   recommended?: [number, number];
   entries: LogEntry[];
   isOpen?: boolean;
-  addHref?: string;
+  // Where tapping the header goes: opens the card, or closes it if it is already open.
+  // Omit for cards that cannot be opened (Unassigned).
+  toggleHref?: string;
   children?: ReactNode; // shown only while the card is open (the add-food controls)
 };
 
-export function MealCard({ meal, title, recommended, entries, isOpen = false, addHref, children }: Props) {
+export function MealCard({ meal, title, recommended, entries, isOpen = false, toggleHref, children }: Props) {
   const Icon = meal ? ICONS[meal] : Utensils;
   const kcal = Math.round(totalsFor(entries).calories);
+
+  const header = (
+    <>
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
+        <Icon className="size-6" aria-hidden="true" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="font-semibold">{title}</h3>
+        {recommended ? (
+          <p className="text-xs text-muted-foreground">
+            Recommended: {recommended[0]} — {recommended[1]} kcal
+          </p>
+        ) : null}
+      </div>
+      {kcal > 0 ? (
+        <span className="text-sm tabular-nums text-muted-foreground">{kcal} kcal</span>
+      ) : null}
+      {toggleHref ? (
+        <span
+          aria-hidden="true"
+          className={cn(
+            "flex size-10 shrink-0 items-center justify-center rounded-full",
+            isOpen ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground",
+          )}
+        >
+          {isOpen ? <Minus className="size-5" /> : <Plus className="size-5" />}
+        </span>
+      ) : null}
+    </>
+  );
 
   return (
     <section
@@ -29,37 +61,18 @@ export function MealCard({ meal, title, recommended, entries, isOpen = false, ad
         isOpen && "ring-2 ring-primary/40",
       )}
     >
-      <div className="flex items-center gap-3">
-        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
-          <Icon className="size-6" aria-hidden="true" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="font-semibold">{title}</h3>
-          {recommended ? (
-            <p className="text-xs text-muted-foreground">
-              Recommended: {recommended[0]} — {recommended[1]} kcal
-            </p>
-          ) : null}
-        </div>
-        {kcal > 0 ? (
-          <span className="text-sm tabular-nums text-muted-foreground">{kcal} kcal</span>
-        ) : null}
-        {addHref ? (
-          <Link
-            href={addHref}
-            aria-label={`Add food to ${title}`}
-            aria-current={isOpen ? "true" : undefined}
-            className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-full",
-              isOpen
-                ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground",
-            )}
-          >
-            <Plus className="size-5" aria-hidden="true" />
-          </Link>
-        ) : null}
-      </div>
+      {toggleHref ? (
+        <Link
+          href={toggleHref}
+          scroll={false}
+          aria-expanded={isOpen}
+          className="-m-1 flex items-center gap-3 rounded-xl p-1 outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {header}
+        </Link>
+      ) : (
+        <div className="flex items-center gap-3">{header}</div>
+      )}
 
       {entries.length > 0 ? (
         <ul className="mt-3 flex flex-col divide-y divide-border border-t">

@@ -41,6 +41,7 @@ enum MealType {
   breakfast
   lunch
   dinner
+  snack
 }
 
 model Food {
