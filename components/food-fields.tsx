@@ -23,7 +23,7 @@ export function FoodFields({ food }: { food?: Food }) {
         <input
           name="serving_label"
           placeholder="1 bowl"
-          defaultValue={food?.serving_label}
+          defaultValue={food?.servingLabel}
           className={input}
         />
       </label>
@@ -46,7 +46,7 @@ export function FoodFields({ food }: { food?: Food }) {
           type="number"
           min="0"
           step="any"
-          defaultValue={food?.protein_g}
+          defaultValue={food?.proteinG}
           className={input}
         />
       </label>
@@ -57,7 +57,7 @@ export function FoodFields({ food }: { food?: Food }) {
           type="number"
           min="0"
           step="any"
-          defaultValue={food?.carbs_g}
+          defaultValue={food?.carbsG}
           className={input}
         />
       </label>
@@ -68,7 +68,7 @@ export function FoodFields({ food }: { food?: Food }) {
           type="number"
           min="0"
           step="any"
-          defaultValue={food?.fat_g}
+          defaultValue={food?.fatG}
           className={input}
         />
       </label>

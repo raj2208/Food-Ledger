@@ -2,14 +2,29 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+This project uses [pnpm](https://pnpm.io) only. Data lives in PostgreSQL, accessed through [Prisma](https://www.prisma.io).
 
-This project uses [pnpm](https://pnpm.io) only.
+Prerequisites: Node.js 24 (LTS) and Docker.
 
 ```bash
-pnpm install
+pnpm install              # also generates the Prisma client
+cp .env.example .env      # DATABASE_URL for the local Postgres below
+pnpm db:up                # start Postgres in Docker (waits until healthy)
+pnpm db:migrate           # apply migrations
 pnpm dev
 ```
+
+### Database scripts
+
+| Script             | What it does                                          |
+| ------------------ | ----------------------------------------------------- |
+| `pnpm db:up`       | Start local Postgres (Docker)                         |
+| `pnpm db:down`     | Stop it (data is kept in a Docker volume)             |
+| `pnpm db:migrate`  | Create/apply migrations after editing `schema.prisma` |
+| `pnpm db:deploy`   | Apply existing migrations only (production/CI)        |
+| `pnpm db:generate` | Regenerate the Prisma client                          |
+| `pnpm db:studio`   | Browse the data at http://localhost:5555              |
+| `pnpm db:reset`    | Drop everything and re-apply migrations (destroys data) |
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

@@ -1,69 +1,65 @@
 import { connection } from "next/server";
-import { getDb } from "./db";
+import type { LogEntry } from "@/generated/prisma/client";
+import { getPrisma } from "./prisma";
 import type { Food } from "./foods";
 
-// Values are per-serving snapshots; totals are per-serving * quantity.
-export type LogEntry = {
-  id: number;
-  food_id: number | null;
-  eaten_on: string;
-  quantity: number;
-  food_name: string;
-  serving_label: string;
-  calories: number;
-  protein_g: number;
-  carbs_g: number;
-  fat_g: number;
-};
+export type { LogEntry };
 
+// Values are per-serving snapshots; totals are per-serving * quantity.
 export type DayTotals = {
   calories: number;
-  protein_g: number;
-  carbs_g: number;
-  fat_g: number;
+  proteinG: number;
+  carbsG: number;
+  fatG: number;
 };
+
+// The DB column is a DATE; pin the JS Date to UTC midnight so it never shifts a day.
+function dayToDate(day: string): Date {
+  return new Date(`${day}T00:00:00Z`);
+}
 
 export async function listEntriesForDay(day: string): Promise<LogEntry[]> {
   await connection();
-  return getDb()
-    .prepare("SELECT * FROM log_entries WHERE eaten_on = ? ORDER BY id")
-    .all(day) as LogEntry[];
+  return getPrisma().logEntry.findMany({
+    where: { eatenOn: dayToDate(day) },
+    orderBy: { id: "asc" },
+  });
 }
 
 export function totalsFor(entries: LogEntry[]): DayTotals {
   return entries.reduce<DayTotals>(
     (t, e) => ({
       calories: t.calories + e.calories * e.quantity,
-      protein_g: t.protein_g + e.protein_g * e.quantity,
-      carbs_g: t.carbs_g + e.carbs_g * e.quantity,
-      fat_g: t.fat_g + e.fat_g * e.quantity,
+      proteinG: t.proteinG + e.proteinG * e.quantity,
+      carbsG: t.carbsG + e.carbsG * e.quantity,
+      fatG: t.fatG + e.fatG * e.quantity,
     }),
-    { calories: 0, protein_g: 0, carbs_g: 0, fat_g: 0 },
+    { calories: 0, proteinG: 0, carbsG: 0, fatG: 0 },
   );
 }
 
-export function insertEntry(food: Food, day: string, quantity: number): void {
-  getDb()
-    .prepare(
-      `INSERT INTO log_entries
-         (food_id, eaten_on, quantity, food_name, serving_label, calories, protein_g, carbs_g, fat_g)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .run(
-      food.id,
-      day,
+export async function insertEntry(
+  food: Food,
+  day: string,
+  quantity: number,
+): Promise<void> {
+  await getPrisma().logEntry.create({
+    data: {
+      foodId: food.id,
+      eatenOn: dayToDate(day),
       quantity,
-      food.name,
-      food.serving_label,
-      food.calories,
-      food.protein_g,
-      food.carbs_g,
-      food.fat_g,
-    );
+      foodName: food.name,
+      servingLabel: food.servingLabel,
+      calories: food.calories,
+      proteinG: food.proteinG,
+      carbsG: food.carbsG,
+      fatG: food.fatG,
+    },
+  });
 }
 
-export function deleteEntryRow(id: number): void {
-  getDb().prepare("DELETE FROM log_entries WHERE id = ?").run(id);
+export async function deleteEntryRow(id: number): Promise<void> {
+  await getPrisma().logEntry.delete({ where: { id } });
 }
 
 export function todayLocal(): string {

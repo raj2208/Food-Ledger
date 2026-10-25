@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum FoodKind {
+  homemade
+  packaged
+}
+
+model Food {
+  id           Int        @id @default(autoincrement())
+  name         String
+  kind         FoodKind
+  barcode      String?
+  servingLabel String     @map("serving_label")
+  calories     Float
+  proteinG     Float      @default(0) @map("protein_g")
+  carbsG       Float      @default(0) @map("carbs_g")
+  fatG         Float      @default(0) @map("fat_g")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  entries      LogEntry[]
+
+  @@map("foods")
+}
+
+// Each entry snapshots the food's per-serving values at the time it was
+// logged, so editing or deleting a food never rewrites history.
+model LogEntry {
+  id           Int      @id @default(autoincrement())
+  foodId       Int?     @map("food_id")
+  food         Food?    @relation(fields: [foodId], references: [id], onDelete: SetNull)
+  eatenOn      DateTime @map("eaten_on") @db.Date
+  quantity     Float
+  foodName     String   @map("food_name")
+  servingLabel String   @map("serving_label")
+  calories     Float
+  proteinG     Float    @map("protein_g")
+  carbsG       Float    @map("carbs_g")
+  fatG         Float    @map("fat_g")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([eatenOn])
+  @@map("log_entries")
+}

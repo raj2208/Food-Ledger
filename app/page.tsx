@@ -51,9 +51,9 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
           <span className="text-base font-normal text-zinc-500">kcal</span>
         </div>
         <div className="mt-1 flex gap-4 text-sm text-zinc-500 tabular-nums">
-          <span>Protein {Math.round(totals.protein_g)} g</span>
-          <span>Carbs {Math.round(totals.carbs_g)} g</span>
-          <span>Fat {Math.round(totals.fat_g)} g</span>
+          <span>Protein {Math.round(totals.proteinG)} g</span>
+          <span>Carbs {Math.round(totals.carbsG)} g</span>
+          <span>Fat {Math.round(totals.fatG)} g</span>
         </div>
       </section>
 
@@ -75,7 +75,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
               <select name="food_id" required className={inputClass}>
                 {foods.map((f) => (
                   <option key={f.id} value={f.id}>
-                    {f.name} ({f.serving_label} · {Math.round(f.calories)} kcal)
+                    {f.name} ({f.servingLabel} · {Math.round(f.calories)} kcal)
                   </option>
                 ))}
               </select>
@@ -108,9 +108,9 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
             {entries.map((e) => (
               <li key={e.id} className="flex items-center justify-between gap-4 py-2">
                 <div>
-                  <div>{e.food_name}</div>
+                  <div>{e.foodName}</div>
                   <div className="text-xs text-zinc-500">
-                    {e.quantity} × {e.serving_label}
+                    {e.quantity} × {e.servingLabel}
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

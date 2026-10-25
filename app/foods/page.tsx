@@ -52,7 +52,7 @@ async function FoodList() {
               <span>
                 {f.name}{" "}
                 <span className="text-xs text-zinc-500">
-                  · {f.serving_label} · {f.kind === "packaged" ? "packaged" : "non-packaged"}
+                  · {f.servingLabel} · {f.kind === "packaged" ? "packaged" : "non-packaged"}
                 </span>
               </span>
               <span className="text-sm tabular-nums">{Math.round(f.calories)} kcal</span>

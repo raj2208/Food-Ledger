@@ -35,11 +35,11 @@ function parseFood(formData: FormData): FoodInput {
     name,
     kind: kind as FoodKind,
     barcode: text(formData, "barcode") || null,
-    serving_label: text(formData, "serving_label") || "1 serving",
+    servingLabel: text(formData, "serving_label") || "1 serving",
     calories: number(formData, "calories"),
-    protein_g: number(formData, "protein_g", 0),
-    carbs_g: number(formData, "carbs_g", 0),
-    fat_g: number(formData, "fat_g", 0),
+    proteinG: number(formData, "protein_g", 0),
+    carbsG: number(formData, "carbs_g", 0),
+    fatG: number(formData, "fat_g", 0),
   };
 }
 
@@ -49,32 +49,32 @@ function refresh() {
 }
 
 export async function createFood(formData: FormData) {
-  insertFood(parseFood(formData));
+  await insertFood(parseFood(formData));
   refresh();
 }
 
 export async function updateFood(id: number, formData: FormData) {
-  updateFoodRow(id, parseFood(formData));
+  await updateFoodRow(id, parseFood(formData));
   refresh();
 }
 
 export async function deleteFood(id: number) {
-  deleteFoodRow(id);
+  await deleteFoodRow(id);
   refresh();
 }
 
 export async function logFood(formData: FormData) {
-  const food = getFoodRow(Number(text(formData, "food_id")));
+  const food = await getFoodRow(Number(text(formData, "food_id")));
   if (!food) throw new Error("Pick a food to log");
   const day = text(formData, "day");
   if (!isValidDay(day)) throw new Error("Invalid date");
   const quantity = number(formData, "quantity", 1);
   if (quantity <= 0) throw new Error("Quantity must be greater than 0");
-  insertEntry(food, day, quantity);
+  await insertEntry(food, day, quantity);
   refresh();
 }
 
 export async function deleteEntry(id: number) {
-  deleteEntryRow(id);
+  await deleteEntryRow(id);
   refresh();
 }
