@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ModeToggle } from "@/components/mode-toggle";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -22,25 +24,34 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <header className="border-b border-zinc-200 dark:border-zinc-800">
-          <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-            <Link href="/" className="font-semibold">
-              Food Ledger
-            </Link>
-            <nav className="flex gap-4 text-sm">
-              <Link href="/" className="hover:underline">
-                Log
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <header className="border-b border-zinc-200 dark:border-zinc-800">
+            <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
+              <Link href="/" className="font-semibold">
+                Food Ledger
               </Link>
-              <Link href="/foods" className="hover:underline">
-                Foods
-              </Link>
-            </nav>
-          </div>
-        </header>
-        <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">{children}</main>
+              <nav className="flex items-center gap-4 text-sm">
+                <Link href="/" className="hover:underline">
+                  Log
+                </Link>
+                <Link href="/foods" className="hover:underline">
+                  Foods
+                </Link>
+                <ModeToggle />
+              </nav>
+            </div>
+          </header>
+          <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );
