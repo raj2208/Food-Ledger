@@ -5,32 +5,35 @@ import {
   FoodFields,
   ghostButtonClass,
 } from "@/components/food-fields";
+import { PageShell } from "@/components/page-shell";
 import { listFoods } from "@/lib/foods";
 
 export const metadata = { title: "Foods · Food Ledger" };
 
 export default function FoodsPage() {
   return (
-    <div className="flex flex-col gap-8">
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Add a food</h2>
-        <form action={createFood} className="flex flex-col gap-3">
-          <FoodFields />
-          <div>
-            <button type="submit" className={buttonClass}>
-              Save food
-            </button>
-          </div>
-        </form>
-      </section>
+    <PageShell>
+      <div className="flex flex-col gap-8">
+        <section>
+          <h2 className="mb-3 text-lg font-semibold">Add a food</h2>
+          <form action={createFood} className="flex flex-col gap-3">
+            <FoodFields />
+            <div>
+              <button type="submit" className={buttonClass}>
+                Save food
+              </button>
+            </div>
+          </form>
+        </section>
 
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Your foods</h2>
-        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-          <FoodList />
-        </Suspense>
-      </section>
-    </div>
+        <section>
+          <h2 className="mb-3 text-lg font-semibold">Your foods</h2>
+          <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+            <FoodList />
+          </Suspense>
+        </section>
+      </div>
+    </PageShell>
   );
 }
 

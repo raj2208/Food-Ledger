@@ -24,9 +24,8 @@ export function MealCard({ meal, title, recommended, entries, isOpen = false, ad
 
   return (
     <section
-      id={isOpen ? "log-food" : undefined}
       className={cn(
-        "scroll-mt-6 rounded-2xl border bg-card p-4 shadow-sm",
+        "rounded-2xl border bg-card p-4 shadow-sm",
         isOpen && "ring-2 ring-primary/40",
       )}
     >

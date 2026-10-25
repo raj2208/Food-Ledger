@@ -18,7 +18,10 @@ export function ModeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label="Toggle theme"
-        className={cn(buttonVariants({ variant: "outline", size: "icon" }), "relative")}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "icon" }),
+          "relative border-transparent bg-white/30 hover:bg-white/50 dark:bg-black/20 dark:hover:bg-black/30",
+        )}
       >
         {/* Icons swap via the `dark` class, so there is no hydration mismatch. */}
         <Sun className="size-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />

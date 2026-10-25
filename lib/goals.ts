@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { cache } from "react";
 import type { MealType } from "@/generated/prisma/enums";
 import { getPrisma } from "./prisma";
 
@@ -18,7 +19,8 @@ export const DEFAULT_GOALS: Goals = {
 
 const GOALS_ID = 1;
 
-export async function getGoals(): Promise<Goals> {
+// cache(): the page reads goals in two places; this runs the query once per request.
+export const getGoals = cache(async (): Promise<Goals> => {
   await connection();
   const row = await getPrisma().dailyGoals.findUnique({ where: { id: GOALS_ID } });
   if (!row) return DEFAULT_GOALS;
@@ -28,7 +30,7 @@ export async function getGoals(): Promise<Goals> {
     proteinG: row.proteinG,
     fatG: row.fatG,
   };
-}
+});
 
 export async function saveGoalsRow(goals: Goals): Promise<void> {
   await getPrisma().dailyGoals.upsert({

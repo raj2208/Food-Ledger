@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { ghostButtonClass } from "@/components/food-fields";
+import { PageShell } from "@/components/page-shell";
 import {
   buildMonthGrid,
   isValidMonth,
@@ -15,9 +16,11 @@ export const metadata = { title: "Calendar · Food Ledger" };
 
 export default function CalendarPage({ searchParams }: PageProps<"/calendar">) {
   return (
-    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-      <Month searchParams={searchParams} />
-    </Suspense>
+    <PageShell>
+      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+        <Month searchParams={searchParams} />
+      </Suspense>
+    </PageShell>
   );
 }
 

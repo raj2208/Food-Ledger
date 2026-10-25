@@ -1,4 +1,5 @@
 import { connection } from "next/server";
+import { cache } from "react";
 import type { LogEntry } from "@/generated/prisma/client";
 import type { MealType } from "@/generated/prisma/enums";
 import { getPrisma } from "./prisma";
@@ -35,13 +36,14 @@ function dayToDate(day: string): Date {
   return new Date(`${day}T00:00:00Z`);
 }
 
-export async function listEntriesForDay(day: string): Promise<LogEntry[]> {
+// cache(): the page reads a day's entries in two places; this runs the query once per request.
+export const listEntriesForDay = cache(async (day: string): Promise<LogEntry[]> => {
   await connection();
   return getPrisma().logEntry.findMany({
     where: { eatenOn: dayToDate(day) },
     orderBy: { id: "asc" },
   });
-}
+});
 
 // Calories per day ("YYYY-MM-DD" -> kcal) for a "YYYY-MM" month. Days with no logs are absent.
 export async function listDayCaloriesForMonth(

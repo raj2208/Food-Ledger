@@ -5,8 +5,8 @@ import { Suspense } from "react";
 import { logFood } from "@/app/actions";
 import { DaySummary } from "@/components/day-summary";
 import { buttonClass, inputClass } from "@/components/food-fields";
-import { Hero } from "@/components/hero";
 import { MealCard } from "@/components/meal-card";
+import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { dayLabel } from "@/lib/calendar";
 import { listFoods, type Food } from "@/lib/foods";
@@ -24,11 +24,21 @@ import {
   type MealType,
 } from "@/lib/log";
 
+type Params = PageProps<"/">["searchParams"];
+
 export default function Home({ searchParams }: PageProps<"/">) {
   return (
-    <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-      <Day searchParams={searchParams} />
-    </Suspense>
+    <PageShell
+      hero={
+        <Suspense fallback={<div className="min-h-80" aria-hidden="true" />}>
+          <Summary searchParams={searchParams} />
+        </Suspense>
+      }
+    >
+      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+        <Day searchParams={searchParams} />
+      </Suspense>
+    </PageShell>
   );
 }
 
@@ -39,30 +49,36 @@ function href(day: string, meal: MealType): string {
 const navButton =
   "flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground";
 
-async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParams"] }) {
-  await connection(); // "today" and the default meal depend on the request time
+// Which day and meal the page is showing. Needs the request time, so it opts out of prerendering.
+async function resolveView(searchParams: Params) {
+  await connection();
   const { date, meal: mealParam } = await searchParams;
   const requested = typeof date === "string" ? date : "";
   const day = isValidDay(requested) ? requested : todayLocal();
   const meal: MealType =
     typeof mealParam === "string" && isMeal(mealParam) ? mealParam : mealForNow();
+  return { day, meal, isToday: day === todayLocal() };
+}
 
+// Rendered inside the gradient band in PageShell.
+async function Summary({ searchParams }: { searchParams: Params }) {
+  const { day } = await resolveView(searchParams);
+  const [entries, goals] = await Promise.all([listEntriesForDay(day), getGoals()]);
+  return <DaySummary totals={totalsFor(entries)} goals={goals} />;
+}
+
+async function Day({ searchParams }: { searchParams: Params }) {
+  const { day, meal, isToday } = await resolveView(searchParams);
   const [entries, foods, frequent, goals] = await Promise.all([
     listEntriesForDay(day),
     listFoods(),
     listFrequentFoods(),
     getGoals(),
   ]);
-  const totals = totalsFor(entries);
-  const isToday = day === todayLocal();
   const unassigned = entries.filter((e) => e.meal === null);
 
   return (
     <div className="flex flex-col gap-6">
-      <Hero />
-
-      <DaySummary totals={totals} goals={goals} />
-
       <nav className="flex items-center justify-between">
         <Link href={href(shiftDay(day, -1), meal)} aria-label="Previous day" className={navButton}>
           <ChevronLeft className="size-5" aria-hidden="true" />

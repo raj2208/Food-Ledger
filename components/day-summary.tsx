@@ -12,6 +12,7 @@ function Stat({ label, value, align }: { label: string; value: number; align: "l
   );
 }
 
+// Lives inside the page's gradient band (see PageShell), so it draws no background of its own.
 export function DaySummary({ totals, goals }: { totals: DayTotals; goals: Goals }) {
   const macros = [
     { label: "Carbs", eaten: totals.carbsG, goal: goals.carbsG },
@@ -20,7 +21,9 @@ export function DaySummary({ totals, goals }: { totals: DayTotals; goals: Goals 
   ];
 
   return (
-    <section className="bg-brand-gradient rounded-3xl p-5 shadow-sm">
+    <div>
+      <h1 className="mb-4 text-center text-sm font-medium">Log it once. Track it forever.</h1>
+
       <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-2">
         <Stat label="Eaten" value={Math.round(totals.calories)} align="left" />
         <div className="w-44 sm:w-56">
@@ -58,6 +61,6 @@ export function DaySummary({ totals, goals }: { totals: DayTotals; goals: Goals 
           Edit goals
         </Link>
       </div>
-    </section>
+    </div>
   );
 }

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ModeToggle } from "@/components/mode-toggle";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -34,29 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          <header className="border-b border-border">
-            <div className="mx-auto flex max-w-2xl items-center justify-between px-4 py-3">
-              <Link href="/" className="font-semibold">
-                Food Ledger
-              </Link>
-              <nav className="flex items-center gap-4 text-sm">
-                <Link href="/" className="hover:underline">
-                  Log
-                </Link>
-                <Link href="/calendar" className="hover:underline">
-                  Calendar
-                </Link>
-                <Link href="/foods" className="hover:underline">
-                  Foods
-                </Link>
-                <Link href="/goals" className="hover:underline">
-                  Goals
-                </Link>
-                <ModeToggle />
-              </nav>
-            </div>
-          </header>
-          <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">{children}</main>
+          {children}
         </ThemeProvider>
       </body>
     </html>

@@ -1,21 +1,24 @@
 import { Suspense } from "react";
 import { saveGoals } from "@/app/actions";
 import { buttonClass, inputClass } from "@/components/food-fields";
+import { PageShell } from "@/components/page-shell";
 import { getGoals } from "@/lib/goals";
 
 export const metadata = { title: "Goals · Food Ledger" };
 
 export default function GoalsPage() {
   return (
-    <section>
-      <h2 className="mb-1 text-lg font-semibold">Daily goals</h2>
-      <p className="mb-4 text-sm text-muted-foreground">
-        These drive the &ldquo;kcal left&rdquo; gauge, the macro bars, and the recommended range on each meal.
-      </p>
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-        <GoalsForm />
-      </Suspense>
-    </section>
+    <PageShell>
+      <section>
+        <h2 className="mb-1 text-lg font-semibold">Daily goals</h2>
+        <p className="mb-4 text-sm text-muted-foreground">
+          These drive the &ldquo;kcal left&rdquo; gauge, the macro bars, and the recommended range on each meal.
+        </p>
+        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+          <GoalsForm />
+        </Suspense>
+      </section>
+    </PageShell>
   );
 }
 
