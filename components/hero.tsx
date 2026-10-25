@@ -3,14 +3,14 @@ import { buttonVariants } from "@/components/ui/button";
 
 export function Hero() {
   return (
-    <section className="rounded-xl border bg-secondary px-6 py-10 text-center sm:py-14">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+    <section className="rounded-3xl border bg-secondary px-6 py-6 text-center sm:py-8">
+      <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
         Log it once. Track it forever.
       </h1>
-      <p className="mx-auto mt-3 max-w-md text-muted-foreground">
+      <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground sm:text-base">
         Save your everyday meals with their calories, then add them to any day in one tap.
       </p>
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
+      <div className="mt-4 flex flex-wrap justify-center gap-3">
         <Link href="#log-food" className={buttonVariants({ size: "lg" })}>
           Log a meal
         </Link>

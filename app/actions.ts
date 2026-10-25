@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { saveGoalsRow } from "@/lib/goals";
 import {
   deleteFoodRow,
   getFoodRow,
@@ -75,6 +77,20 @@ export async function logFood(formData: FormData) {
   if (quantity <= 0) throw new Error("Quantity must be greater than 0");
   await insertEntry(food, day, meal, quantity);
   refresh();
+}
+
+export async function saveGoals(formData: FormData) {
+  const calories = number(formData, "calories");
+  if (calories <= 0) throw new Error("Calorie goal must be greater than 0");
+  await saveGoalsRow({
+    calories,
+    carbsG: number(formData, "carbs_g"),
+    proteinG: number(formData, "protein_g"),
+    fatG: number(formData, "fat_g"),
+  });
+  refresh();
+  revalidatePath("/goals");
+  redirect("/");
 }
 
 export async function deleteEntry(id: number) {

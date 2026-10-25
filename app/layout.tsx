@@ -49,6 +49,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <Link href="/foods" className="hover:underline">
                   Foods
                 </Link>
+                <Link href="/goals" className="hover:underline">
+                  Goals
+                </Link>
                 <ModeToggle />
               </nav>
             </div>

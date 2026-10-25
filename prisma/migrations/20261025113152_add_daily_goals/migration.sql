@@ -1,0 +1,11 @@
+-- CreateTable
+CREATE TABLE "daily_goals" (
+    "id" INTEGER NOT NULL DEFAULT 1,
+    "calories" DOUBLE PRECISION NOT NULL DEFAULT 2000,
+    "carbs_g" DOUBLE PRECISION NOT NULL DEFAULT 250,
+    "protein_g" DOUBLE PRECISION NOT NULL DEFAULT 100,
+    "fat_g" DOUBLE PRECISION NOT NULL DEFAULT 70,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "daily_goals_pkey" PRIMARY KEY ("id")
+);

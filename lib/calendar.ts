@@ -25,6 +25,16 @@ export function monthLabel(month: string): string {
   });
 }
 
+// "Today, Oct 25" for today, otherwise "Mon, Oct 26".
+export function dayLabel(day: string, isToday: boolean): string {
+  const [y, m, d] = day.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  const date = dt.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  if (isToday) return `Today, ${date}`;
+  const weekday = dt.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" });
+  return `${weekday}, ${date}`;
+}
+
 // Weeks start on Monday. Cells before the 1st and after the last day are null.
 export function buildMonthGrid(month: string): (string | null)[] {
   const [y, m] = parts(month);

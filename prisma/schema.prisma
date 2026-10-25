@@ -12,6 +12,18 @@ enum FoodKind {
   packaged
 }
 
+// A single row (id = 1): the daily targets shown on the home page.
+model DailyGoals {
+  id        Int      @id @default(1)
+  calories  Float    @default(2000)
+  carbsG    Float    @default(250) @map("carbs_g")
+  proteinG  Float    @default(100) @map("protein_g")
+  fatG      Float    @default(70) @map("fat_g")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("daily_goals")
+}
+
 enum MealType {
   breakfast
   lunch
