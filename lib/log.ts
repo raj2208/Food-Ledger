@@ -26,6 +26,23 @@ export async function listEntriesForDay(day: string): Promise<LogEntry[]> {
   });
 }
 
+// The foods you log most, so repeat meals are one tap away.
+export async function listFrequentFoods(limit = 5): Promise<Food[]> {
+  await connection();
+  const prisma = getPrisma();
+  const groups = await prisma.logEntry.groupBy({
+    by: ["foodId"],
+    where: { foodId: { not: null } },
+    _count: { _all: true },
+    orderBy: [{ _count: { foodId: "desc" } }, { foodId: "asc" }],
+    take: limit,
+  });
+  const ids = groups.flatMap((g) => (g.foodId === null ? [] : [g.foodId]));
+  const foods = await prisma.food.findMany({ where: { id: { in: ids } } });
+  const byId = new Map(foods.map((f) => [f.id, f]));
+  return ids.flatMap((id) => byId.get(id) ?? []);
+}
+
 export function totalsFor(entries: LogEntry[]): DayTotals {
   return entries.reduce<DayTotals>(
     (t, e) => ({

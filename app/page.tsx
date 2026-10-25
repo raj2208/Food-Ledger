@@ -3,10 +3,12 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { deleteEntry, logFood } from "@/app/actions";
 import { buttonClass, ghostButtonClass, inputClass } from "@/components/food-fields";
+import { Button } from "@/components/ui/button";
 import { listFoods } from "@/lib/foods";
 import {
   isValidDay,
   listEntriesForDay,
+  listFrequentFoods,
   shiftDay,
   todayLocal,
   totalsFor,
@@ -26,7 +28,11 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
   const requested = typeof date === "string" ? date : "";
   const day = isValidDay(requested) ? requested : todayLocal();
 
-  const [entries, foods] = await Promise.all([listEntriesForDay(day), listFoods()]);
+  const [entries, foods, frequent] = await Promise.all([
+    listEntriesForDay(day),
+    listFoods(),
+    listFrequentFoods(),
+  ]);
   const totals = totalsFor(entries);
   const isToday = day === todayLocal();
 
@@ -68,6 +74,26 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
             to start logging.
           </p>
         ) : (
+          <>
+          {frequent.length > 0 ? (
+            <div className="mb-5">
+              <div className="mb-2 text-xs font-medium text-zinc-500">
+                Quick add · 1 serving
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {frequent.map((f) => (
+                  <form key={f.id} action={logFood}>
+                    <input type="hidden" name="day" value={day} />
+                    <input type="hidden" name="food_id" value={f.id} />
+                    <input type="hidden" name="quantity" value="1" />
+                    <Button type="submit" variant="outline">
+                      {f.name} · {Math.round(f.calories)} kcal
+                    </Button>
+                  </form>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <form action={logFood} className="flex flex-wrap items-end gap-3">
             <input type="hidden" name="day" value={day} />
             <label className="flex min-w-48 flex-1 flex-col gap-1 text-xs font-medium text-zinc-500">
@@ -96,6 +122,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
               Add
             </button>
           </form>
+          </>
         )}
       </section>
 
