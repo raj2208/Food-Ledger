@@ -9,7 +9,7 @@ import {
   type FoodInput,
   type FoodKind,
 } from "@/lib/foods";
-import { deleteEntryRow, insertEntry, isValidDay } from "@/lib/log";
+import { deleteEntryRow, insertEntry, isMeal, isValidDay } from "@/lib/log";
 
 function text(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -69,9 +69,11 @@ export async function logFood(formData: FormData) {
   if (!food) throw new Error("Pick a food to log");
   const day = text(formData, "day");
   if (!isValidDay(day)) throw new Error("Invalid date");
+  const meal = text(formData, "meal");
+  if (!isMeal(meal)) throw new Error("Pick breakfast, lunch or dinner");
   const quantity = number(formData, "quantity", 1);
   if (quantity <= 0) throw new Error("Quantity must be greater than 0");
-  await insertEntry(food, day, quantity);
+  await insertEntry(food, day, meal, quantity);
   refresh();
 }
 

@@ -12,6 +12,12 @@ enum FoodKind {
   packaged
 }
 
+enum MealType {
+  breakfast
+  lunch
+  dinner
+}
+
 model Food {
   id           Int        @id @default(autoincrement())
   name         String
@@ -36,6 +42,8 @@ model LogEntry {
   foodId       Int?     @map("food_id")
   food         Food?    @relation(fields: [foodId], references: [id], onDelete: SetNull)
   eatenOn      DateTime @map("eaten_on") @db.Date
+  // Null only for entries logged before meals existed.
+  meal         MealType?
   quantity     Float
   foodName     String   @map("food_name")
   servingLabel String   @map("serving_label")
