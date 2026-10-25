@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { deleteEntry, logFood } from "@/app/actions";
 import { buttonClass, ghostButtonClass, inputClass } from "@/components/food-fields";
+import { Hero } from "@/components/hero";
 import { Button } from "@/components/ui/button";
 import { listFoods } from "@/lib/foods";
 import {
@@ -49,6 +50,8 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
 
   return (
     <div className="flex flex-col gap-8">
+      <Hero />
+
       <nav className="flex items-center justify-between">
         <Link href={href(shiftDay(day, -1), meal)} className={ghostButtonClass}>
           ← Prev
@@ -74,7 +77,7 @@ async function Day({ searchParams }: { searchParams: PageProps<"/">["searchParam
         </div>
       </section>
 
-      <section>
+      <section id="log-food" className="scroll-mt-6">
         <h2 className="mb-3 text-lg font-semibold">Log food</h2>
 
         <div className="mb-4 flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-900" role="tablist">
