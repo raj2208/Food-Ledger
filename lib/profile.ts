@@ -26,3 +26,74 @@ export function formatDate(d: Date): string {
     timeZone: "UTC",
   });
 }
+
+export type ProfileInput = {
+  name: string;
+  email: string;
+  dateOfBirth: string | null; // "YYYY-MM-DD"
+  heightCm: number | null;
+  weightKg: number | null;
+};
+
+// What the form posts: trimmed strings, empty when left blank.
+export type RawProfile = {
+  name: string;
+  email: string;
+  dateOfBirth: string;
+  heightCm: string;
+  weightKg: string;
+};
+
+export type ProfileResult = { ok: true; value: ProfileInput } | { ok: false; error: string };
+
+export const PROFILE_LIMITS = {
+  heightCm: { min: 50, max: 272 },
+  weightKg: { min: 2, max: 650 },
+  earliestBirthDate: "1900-01-01",
+} as const;
+
+function isRealDate(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(`${s}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+}
+
+function optionalNumber(raw: string, label: string, min: number, max: number, unit: string):
+  { ok: true; value: number | null } | { ok: false; error: string } {
+  if (raw === "") return { ok: true, value: null };
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < min || n > max) {
+    return { ok: false, error: `${label} must be between ${min} and ${max} ${unit}` };
+  }
+  return { ok: true, value: n };
+}
+
+// `today` is "YYYY-MM-DD" in the user's local day, passed in so this stays pure and testable.
+export function parseProfile(raw: RawProfile, today: string): ProfileResult {
+  const name = raw.name.trim();
+  if (name === "") return { ok: false, error: "Name is required" };
+  if (name.length > 100) return { ok: false, error: "Name must be 100 characters or fewer" };
+
+  const email = raw.email.trim().toLowerCase();
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { ok: false, error: "Enter a valid email address" };
+  }
+
+  let dateOfBirth: string | null = null;
+  if (raw.dateOfBirth !== "") {
+    if (!isRealDate(raw.dateOfBirth)) return { ok: false, error: "Enter a valid date of birth" };
+    if (raw.dateOfBirth < PROFILE_LIMITS.earliestBirthDate || raw.dateOfBirth > today) {
+      return { ok: false, error: "Date of birth must be between 1900 and today" };
+    }
+    dateOfBirth = raw.dateOfBirth;
+  }
+
+  const h = PROFILE_LIMITS.heightCm;
+  const height = optionalNumber(raw.heightCm, "Height", h.min, h.max, "cm");
+  if (!height.ok) return height;
+  const w = PROFILE_LIMITS.weightKg;
+  const weight = optionalNumber(raw.weightKg, "Weight", w.min, w.max, "kg");
+  if (!weight.ok) return weight;
+
+  return { ok: true, value: { name, email, dateOfBirth, heightCm: height.value, weightKg: weight.value } };
+}

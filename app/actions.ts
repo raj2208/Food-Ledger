@@ -11,7 +11,9 @@ import {
   type FoodInput,
   type FoodKind,
 } from "@/lib/foods";
-import { deleteEntryRow, insertEntry, isMeal, isValidDay } from "@/lib/log";
+import { deleteEntryRow, insertEntry, isMeal, isValidDay, todayLocal } from "@/lib/log";
+import { parseProfile } from "@/lib/profile";
+import { getCurrentUser, updateUserRow } from "@/lib/users";
 
 function text(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -91,6 +93,25 @@ export async function saveGoals(formData: FormData) {
   refresh();
   revalidatePath("/goals");
   redirect("/");
+}
+
+export async function updateProfile(formData: FormData) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("No profile to update");
+  const parsed = parseProfile(
+    {
+      name: text(formData, "name"),
+      email: text(formData, "email"),
+      dateOfBirth: text(formData, "date_of_birth"),
+      heightCm: text(formData, "height_cm"),
+      weightKg: text(formData, "weight_kg"),
+    },
+    todayLocal(),
+  );
+  if (!parsed.ok) throw new Error(parsed.error);
+  await updateUserRow(user.id, parsed.value);
+  revalidatePath("/profile");
+  redirect("/profile");
 }
 
 export async function deleteEntry(id: number) {

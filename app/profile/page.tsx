@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { PageShell } from "@/components/page-shell";
+import { buttonVariants } from "@/components/ui/button";
 import { getGoals } from "@/lib/goals";
 import { ageFrom, formatDate, initials } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/users";
@@ -46,6 +47,9 @@ async function Profile() {
           <h1 className="text-2xl font-semibold">{user.name}</h1>
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
+        <Link href="/profile/edit" className={buttonVariants({ variant: "secondary" })}>
+          Edit profile
+        </Link>
       </section>
 
       <section className="rounded-2xl border bg-card p-4 shadow-sm">

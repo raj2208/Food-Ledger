@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { saveGoals } from "@/app/actions";
 import { buttonClass, inputClass } from "@/components/food-fields";
+import { FreshOnOpen } from "@/components/fresh-on-open";
 import { PageShell } from "@/components/page-shell";
 import { getGoals } from "@/lib/goals";
 
@@ -31,31 +32,33 @@ async function GoalsForm() {
     { name: "fat_g", label: "Fat (g)", value: goals.fatG, min: "0" },
   ];
   return (
-    <form action={saveGoals} className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {fields.map((f) => (
-          <label
-            key={f.name}
-            className="flex flex-col gap-1 text-xs font-medium text-muted-foreground"
-          >
-            {f.label}
-            <input
-              name={f.name}
-              type="number"
-              min={f.min}
-              step="any"
-              required
-              defaultValue={f.value}
-              className={inputClass}
-            />
-          </label>
-        ))}
-      </div>
-      <div>
-        <button type="submit" className={buttonClass}>
-          Save goals
-        </button>
-      </div>
-    </form>
+    <FreshOnOpen>
+      <form action={saveGoals} className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {fields.map((f) => (
+            <label
+              key={f.name}
+              className="flex flex-col gap-1 text-xs font-medium text-muted-foreground"
+            >
+              {f.label}
+              <input
+                name={f.name}
+                type="number"
+                min={f.min}
+                step="any"
+                required
+                defaultValue={f.value}
+                className={inputClass}
+              />
+            </label>
+          ))}
+        </div>
+        <div>
+          <button type="submit" className={buttonClass}>
+            Save goals
+          </button>
+        </div>
+      </form>
+    </FreshOnOpen>
   );
 }
