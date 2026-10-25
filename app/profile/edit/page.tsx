@@ -1,11 +1,16 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { updateProfile } from "@/app/actions";
-import { buttonClass, ghostButtonClass, inputClass } from "@/components/food-fields";
+import { DatePicker } from "@/components/date-picker";
 import { FreshOnOpen } from "@/components/fresh-on-open";
 import { PageShell } from "@/components/page-shell";
-import { PROFILE_LIMITS } from "@/lib/profile";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { todayLocal } from "@/lib/log";
+import { PROFILE_LIMITS } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/users";
 
 export const metadata = { title: "Edit profile · Food Ledger" };
@@ -13,17 +18,19 @@ export const metadata = { title: "Edit profile · Food Ledger" };
 export default function EditProfilePage() {
   return (
     <PageShell>
-      <section>
-        <h1 className="mb-4 text-lg font-semibold">Edit profile</h1>
-        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-          <EditForm />
-        </Suspense>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Edit profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<Skeleton className="h-72 w-full" />}>
+            <EditForm />
+          </Suspense>
+        </CardContent>
+      </Card>
     </PageShell>
   );
 }
-
-const label = "flex flex-col gap-1 text-xs font-medium text-muted-foreground";
 
 async function EditForm() {
   const user = await getCurrentUser();
@@ -34,65 +41,62 @@ async function EditForm() {
   return (
     <FreshOnOpen>
       <form action={updateProfile} className="flex flex-col gap-4">
-        <label className={label}>
-          Name
-          <input name="name" required maxLength={100} defaultValue={user.name} className={inputClass} />
-        </label>
-        <label className={label}>
-          Email
-          <input
+        <Field>
+          <FieldLabel htmlFor="profile-name">Name</FieldLabel>
+          <Input id="profile-name" name="name" required maxLength={100} defaultValue={user.name} />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="profile-email">Email</FieldLabel>
+          <Input
+            id="profile-email"
             name="email"
             type="email"
             required
             maxLength={254}
             defaultValue={user.email}
-            className={inputClass}
           />
-        </label>
-        <label className={label}>
-          Date of birth (optional)
-          <input
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="profile-dob">Date of birth (optional)</FieldLabel>
+          <DatePicker
+            id="profile-dob"
             name="date_of_birth"
-            type="date"
             min={earliestBirthDate}
             max={todayLocal()}
-            defaultValue={user.dateOfBirth ? user.dateOfBirth.toISOString().slice(0, 10) : ""}
-            className={inputClass}
+            defaultValue={user.dateOfBirth ? user.dateOfBirth.toISOString().slice(0, 10) : null}
           />
-        </label>
+        </Field>
         <div className="grid grid-cols-2 gap-4">
-          <label className={label}>
-            Height in cm (optional)
-            <input
+          <Field>
+            <FieldLabel htmlFor="profile-height">Height in cm (optional)</FieldLabel>
+            <Input
+              id="profile-height"
               name="height_cm"
               type="number"
               min={heightCm.min}
               max={heightCm.max}
               step="any"
               defaultValue={user.heightCm ?? ""}
-              className={inputClass}
             />
-          </label>
-          <label className={label}>
-            Weight in kg (optional)
-            <input
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="profile-weight">Weight in kg (optional)</FieldLabel>
+            <Input
+              id="profile-weight"
               name="weight_kg"
               type="number"
               min={weightKg.min}
               max={weightKg.max}
               step="any"
               defaultValue={user.weightKg ?? ""}
-              className={inputClass}
             />
-          </label>
+          </Field>
         </div>
         <div className="flex items-center gap-3">
-          <button type="submit" className={buttonClass}>
-            Save changes
-          </button>
-          <Link href="/profile" className={`${ghostButtonClass} py-2 text-sm`}>
+          <Button type="submit">Save changes</Button>
+          <Button render={<Link href="/profile" />} nativeButton={false} variant="outline">
             Cancel
-          </Link>
+          </Button>
         </div>
       </form>
     </FreshOnOpen>

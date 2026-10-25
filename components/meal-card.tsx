@@ -2,7 +2,10 @@ import { Coffee, Cookie, Minus, Plus, Salad, Soup, Utensils } from "lucide-react
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { deleteEntry } from "@/app/actions";
-import { ghostButtonClass } from "@/components/food-fields";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
+import { Separator } from "@/components/ui/separator";
 import { totalsFor, type LogEntry, type MealType } from "@/lib/log";
 import { cn } from "@/lib/utils";
 
@@ -37,69 +40,73 @@ export function MealCard({ meal, title, recommended, entries, isOpen = false, to
           </p>
         ) : null}
       </div>
-      {kcal > 0 ? (
-        <span className="text-sm tabular-nums text-muted-foreground">{kcal} kcal</span>
-      ) : null}
+      {kcal > 0 ? <span className="text-sm tabular-nums text-muted-foreground">{kcal} kcal</span> : null}
       {toggleHref ? (
         <span
           aria-hidden="true"
           className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-full",
-            isOpen ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground",
+            buttonVariants({ variant: isOpen ? "default" : "secondary", size: "icon-lg" }),
+            "rounded-full",
           )}
         >
-          {isOpen ? <Minus className="size-5" /> : <Plus className="size-5" />}
+          {isOpen ? <Minus /> : <Plus />}
         </span>
       ) : null}
     </>
   );
 
   return (
-    <section
-      className={cn(
-        "rounded-2xl border bg-card p-4 shadow-sm",
-        isOpen && "ring-2 ring-primary/40",
-      )}
-    >
-      {toggleHref ? (
-        <Link
-          href={toggleHref}
-          scroll={false}
-          aria-expanded={isOpen}
-          className="-m-1 flex items-center gap-3 rounded-xl p-1 outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          {header}
-        </Link>
-      ) : (
-        <div className="flex items-center gap-3">{header}</div>
-      )}
+    <Card className={cn(isOpen && "ring-2 ring-primary/40")}>
+      <CardContent className="flex flex-col gap-3">
+        {toggleHref ? (
+          <Link
+            href={toggleHref}
+            scroll={false}
+            aria-expanded={isOpen}
+            className="-m-1 flex items-center gap-3 rounded-xl p-1 outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            {header}
+          </Link>
+        ) : (
+          <div className="flex items-center gap-3">{header}</div>
+        )}
 
-      {entries.length > 0 ? (
-        <ul className="mt-3 flex flex-col divide-y divide-border border-t">
-          {entries.map((e) => (
-            <li key={e.id} className="flex items-center justify-between gap-4 py-2">
-              <div>
-                <div>{e.foodName}</div>
-                <div className="text-xs text-muted-foreground">
-                  {e.quantity} × {e.servingLabel}
+        {entries.length > 0 ? (
+          <>
+            <Separator />
+            <ItemGroup className="gap-0">
+              {entries.map((e, i) => (
+                <div key={e.id}>
+                  {i > 0 ? <ItemSeparator className="my-0" /> : null}
+                  <Item size="sm" className="px-0">
+                    <ItemContent>
+                      <ItemTitle>{e.foodName}</ItemTitle>
+                      <ItemDescription>
+                        {e.quantity} × {e.servingLabel}
+                      </ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                      <span className="text-sm tabular-nums">{Math.round(e.calories * e.quantity)} kcal</span>
+                      <form action={deleteEntry.bind(null, e.id)}>
+                        <Button type="submit" variant="outline" size="sm">
+                          Remove
+                        </Button>
+                      </form>
+                    </ItemActions>
+                  </Item>
                 </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className="text-sm tabular-nums">
-                  {Math.round(e.calories * e.quantity)} kcal
-                </span>
-                <form action={deleteEntry.bind(null, e.id)}>
-                  <button type="submit" className={ghostButtonClass}>
-                    Remove
-                  </button>
-                </form>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+              ))}
+            </ItemGroup>
+          </>
+        ) : null}
 
-      {isOpen && children ? <div className="mt-4 border-t pt-4">{children}</div> : null}
-    </section>
+        {isOpen && children ? (
+          <>
+            <Separator />
+            <div>{children}</div>
+          </>
+        ) : null}
+      </CardContent>
+    </Card>
   );
 }

@@ -4,10 +4,13 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { logFood } from "@/app/actions";
 import { DaySummary } from "@/components/day-summary";
-import { buttonClass, inputClass } from "@/components/food-fields";
 import { MealCard } from "@/components/meal-card";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { dayLabel } from "@/lib/calendar";
 import { listFoods, type Food } from "@/lib/foods";
 import { getGoals, recommendedRange } from "@/lib/goals";
@@ -29,12 +32,12 @@ export default function Home({ searchParams }: PageProps<"/">) {
   return (
     <PageShell
       hero={
-        <Suspense fallback={<div className="min-h-80" aria-hidden="true" />}>
+        <Suspense fallback={<Skeleton className="h-80 w-full bg-white/30 dark:bg-black/20" />}>
           <Summary searchParams={searchParams} />
         </Suspense>
       }
     >
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+      <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl" />}>
         <Day searchParams={searchParams} />
       </Suspense>
     </PageShell>
@@ -45,9 +48,6 @@ export default function Home({ searchParams }: PageProps<"/">) {
 function href(day: string, meal?: MealType | null): string {
   return meal ? `/?date=${day}&meal=${meal}` : `/?date=${day}`;
 }
-
-const navButton =
-  "flex size-9 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground";
 
 // Which day is showing, and which meal card (if any) is open. Every card starts closed.
 // Needs the request time for "today", so it opts out of prerendering.
@@ -81,19 +81,32 @@ async function Day({ searchParams }: { searchParams: Params }) {
   return (
     <div className="flex flex-col gap-6">
       <nav className="flex items-center justify-between">
-        <Link href={href(shiftDay(day, -1), openMeal)} aria-label="Previous day" className={navButton}>
-          <ChevronLeft className="size-5" aria-hidden="true" />
-        </Link>
-        <Link
-          href={`/calendar?month=${day.slice(0, 7)}`}
-          className="flex items-center gap-2 font-medium hover:underline"
+        <Button
+          render={<Link href={href(shiftDay(day, -1), openMeal)} />}
+          nativeButton={false}
+          variant="ghost"
+          size="icon"
+          aria-label="Previous day"
         >
-          <CalendarDays className="size-4" aria-hidden="true" />
+          <ChevronLeft />
+        </Button>
+        <Button
+          render={<Link href={`/calendar?month=${day.slice(0, 7)}`} />}
+          nativeButton={false}
+          variant="ghost"
+        >
+          <CalendarDays data-icon="inline-start" />
           {dayLabel(day, isToday)}
-        </Link>
-        <Link href={href(shiftDay(day, 1), openMeal)} aria-label="Next day" className={navButton}>
-          <ChevronRight className="size-5" aria-hidden="true" />
-        </Link>
+        </Button>
+        <Button
+          render={<Link href={href(shiftDay(day, 1), openMeal)} />}
+          nativeButton={false}
+          variant="ghost"
+          size="icon"
+          aria-label="Next day"
+        >
+          <ChevronRight />
+        </Button>
       </nav>
 
       <div className="flex flex-col gap-4">
@@ -144,10 +157,17 @@ function LogControls({
       </p>
     );
   }
+
+  const foodItems = foods.map((f) => ({
+    value: String(f.id),
+    label: `${f.name} (${f.servingLabel} · ${Math.round(f.calories)} kcal)`,
+  }));
+  const mealLabel = MEALS.find((m) => m.value === meal)?.label.toLowerCase();
+
   return (
-    <>
+    <div className="flex flex-col gap-5">
       {frequent.length > 0 ? (
-        <div className="mb-5">
+        <div>
           <div className="mb-2 text-xs font-medium text-muted-foreground">Quick add · 1 serving</div>
           <div className="flex flex-wrap gap-2">
             {frequent.map((f) => (
@@ -164,35 +184,39 @@ function LogControls({
           </div>
         </div>
       ) : null}
+
       <form action={logFood} className="flex flex-wrap items-end gap-3">
         <input type="hidden" name="day" value={day} />
         <input type="hidden" name="meal" value={meal} />
-        <label className="flex min-w-48 flex-1 flex-col gap-1 text-xs font-medium text-muted-foreground">
-          Food
-          <select name="food_id" required className={inputClass}>
-            {foods.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.name} ({f.servingLabel} · {Math.round(f.calories)} kcal)
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex w-28 flex-col gap-1 text-xs font-medium text-muted-foreground">
-          Servings
-          <input
+        <Field className="min-w-48 flex-1">
+          <FieldLabel htmlFor={`${meal}-food`}>Food</FieldLabel>
+          <Select name="food_id" required items={foodItems} defaultValue={foodItems[0].value}>
+            <SelectTrigger id={`${meal}-food`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {foodItems.map((f) => (
+                <SelectItem key={f.value} value={f.value}>
+                  {f.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field className="w-28">
+          <FieldLabel htmlFor={`${meal}-quantity`}>Servings</FieldLabel>
+          <Input
+            id={`${meal}-quantity`}
             name="quantity"
             type="number"
             min="0.01"
             step="any"
             defaultValue={1}
             required
-            className={inputClass}
           />
-        </label>
-        <button type="submit" className={buttonClass}>
-          Add to {MEALS.find((m) => m.value === meal)?.label.toLowerCase()}
-        </button>
+        </Field>
+        <Button type="submit">Add to {mealLabel}</Button>
       </form>
-    </>
+    </div>
   );
 }

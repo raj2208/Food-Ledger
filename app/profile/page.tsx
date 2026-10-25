@@ -1,7 +1,11 @@
 import Link from "next/link";
-import { Suspense } from "react";
+import { Fragment, Suspense } from "react";
 import { PageShell } from "@/components/page-shell";
-import { buttonVariants } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Item, ItemActions, ItemContent, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getGoals } from "@/lib/goals";
 import { ageFrom, formatDate, initials } from "@/lib/profile";
 import { getCurrentUser } from "@/lib/users";
@@ -11,19 +15,31 @@ export const metadata = { title: "Profile · Food Ledger" };
 export default function ProfilePage() {
   return (
     <PageShell>
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+      <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl" />}>
         <Profile />
       </Suspense>
     </PageShell>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+// Label on the left, value on the right, a separator between rows.
+function Rows({ rows }: { rows: { label: string; value: string }[] }) {
   return (
-    <div className="flex items-center justify-between gap-4 py-3">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium tabular-nums">{value}</dd>
-    </div>
+    <ItemGroup className="gap-0">
+      {rows.map((r, i) => (
+        <Fragment key={r.label}>
+          {i > 0 ? <ItemSeparator className="my-0" /> : null}
+          <Item size="sm" className="px-0">
+            <ItemContent>
+              <ItemTitle className="font-normal text-muted-foreground">{r.label}</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              <span className="text-sm font-medium tabular-nums">{r.value}</span>
+            </ItemActions>
+          </Item>
+        </Fragment>
+      ))}
+    </ItemGroup>
   );
 }
 
@@ -34,53 +50,64 @@ async function Profile() {
     return <p className="text-sm text-muted-foreground">No profile found.</p>;
   }
 
+  const details = [
+    ...(user.dateOfBirth
+      ? [
+          { label: "Date of birth", value: formatDate(user.dateOfBirth) },
+          { label: "Age", value: `${ageFrom(user.dateOfBirth)} years` },
+        ]
+      : []),
+    ...(user.heightCm !== null ? [{ label: "Height", value: `${user.heightCm} cm` }] : []),
+    ...(user.weightKg !== null ? [{ label: "Weight", value: `${user.weightKg} kg` }] : []),
+    { label: "Member since", value: formatDate(user.createdAt) },
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <section className="flex flex-col items-center gap-3 text-center">
-        <div
-          className="flex size-24 items-center justify-center rounded-full bg-primary text-3xl font-semibold text-primary-foreground"
-          aria-hidden="true"
-        >
-          {initials(user.name)}
-        </div>
+        <Avatar className="size-24 text-3xl">
+          <AvatarFallback className="bg-primary text-3xl font-semibold text-primary-foreground">
+            {initials(user.name)}
+          </AvatarFallback>
+        </Avatar>
         <div>
           <h1 className="text-2xl font-semibold">{user.name}</h1>
           <p className="text-sm text-muted-foreground">{user.email}</p>
         </div>
-        <Link href="/profile/edit" className={buttonVariants({ variant: "secondary" })}>
+        <Button render={<Link href="/profile/edit" />} nativeButton={false} variant="secondary">
           Edit profile
-        </Link>
+        </Button>
       </section>
 
-      <section className="rounded-2xl border bg-card p-4 shadow-sm">
-        <h2 className="mb-1 text-sm font-semibold">Personal details</h2>
-        <dl className="divide-y divide-border">
-          {user.dateOfBirth ? (
-            <>
-              <Row label="Date of birth" value={formatDate(user.dateOfBirth)} />
-              <Row label="Age" value={`${ageFrom(user.dateOfBirth)} years`} />
-            </>
-          ) : null}
-          {user.heightCm !== null ? <Row label="Height" value={`${user.heightCm} cm`} /> : null}
-          {user.weightKg !== null ? <Row label="Weight" value={`${user.weightKg} kg`} /> : null}
-          <Row label="Member since" value={formatDate(user.createdAt)} />
-        </dl>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Personal details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Rows rows={details} />
+        </CardContent>
+      </Card>
 
-      <section className="rounded-2xl border bg-card p-4 shadow-sm">
-        <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Daily goals</h2>
-          <Link href="/goals" className="text-xs text-primary underline-offset-2 hover:underline">
-            Edit
-          </Link>
-        </div>
-        <dl className="divide-y divide-border">
-          <Row label="Calories" value={`${Math.round(goals.calories)} kcal`} />
-          <Row label="Carbs" value={`${Math.round(goals.carbsG)} g`} />
-          <Row label="Protein" value={`${Math.round(goals.proteinG)} g`} />
-          <Row label="Fat" value={`${Math.round(goals.fatG)} g`} />
-        </dl>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Daily goals</CardTitle>
+          <CardAction>
+            <Button render={<Link href="/goals" />} nativeButton={false} variant="link" size="sm">
+              Edit
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <Rows
+            rows={[
+              { label: "Calories", value: `${Math.round(goals.calories)} kcal` },
+              { label: "Carbs", value: `${Math.round(goals.carbsG)} g` },
+              { label: "Protein", value: `${Math.round(goals.proteinG)} g` },
+              { label: "Fat", value: `${Math.round(goals.fatG)} g` },
+            ]}
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }

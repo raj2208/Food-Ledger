@@ -1,8 +1,12 @@
 import { Suspense } from "react";
 import { saveGoals } from "@/app/actions";
-import { buttonClass, inputClass } from "@/components/food-fields";
 import { FreshOnOpen } from "@/components/fresh-on-open";
 import { PageShell } from "@/components/page-shell";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getGoals } from "@/lib/goals";
 
 export const metadata = { title: "Goals · Food Ledger" };
@@ -10,15 +14,19 @@ export const metadata = { title: "Goals · Food Ledger" };
 export default function GoalsPage() {
   return (
     <PageShell>
-      <section>
-        <h2 className="mb-1 text-lg font-semibold">Daily goals</h2>
-        <p className="mb-4 text-sm text-muted-foreground">
-          These drive the &ldquo;kcal left&rdquo; gauge, the macro bars, and the recommended range on each meal.
-        </p>
-        <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
-          <GoalsForm />
-        </Suspense>
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Daily goals</CardTitle>
+          <CardDescription>
+            These drive the &ldquo;kcal left&rdquo; gauge, the macro bars, and the recommended range on each meal.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<Skeleton className="h-24 w-full" />}>
+            <GoalsForm />
+          </Suspense>
+        </CardContent>
+      </Card>
     </PageShell>
   );
 }
@@ -34,29 +42,24 @@ async function GoalsForm() {
   return (
     <FreshOnOpen>
       <form action={saveGoals} className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {fields.map((f) => (
-            <label
-              key={f.name}
-              className="flex flex-col gap-1 text-xs font-medium text-muted-foreground"
-            >
-              {f.label}
-              <input
+            <Field key={f.name}>
+              <FieldLabel htmlFor={`goal-${f.name}`}>{f.label}</FieldLabel>
+              <Input
+                id={`goal-${f.name}`}
                 name={f.name}
                 type="number"
                 min={f.min}
                 step="any"
                 required
                 defaultValue={f.value}
-                className={inputClass}
               />
-            </label>
+            </Field>
           ))}
         </div>
         <div>
-          <button type="submit" className={buttonClass}>
-            Save goals
-          </button>
+          <Button type="submit">Save goals</Button>
         </div>
       </form>
     </FreshOnOpen>

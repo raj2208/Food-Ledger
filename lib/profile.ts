@@ -97,3 +97,18 @@ export function parseProfile(raw: RawProfile, today: string): ProfileResult {
 
   return { ok: true, value: { name, email, dateOfBirth, heightCm: height.value, weightKg: weight.value } };
 }
+
+// "YYYY-MM-DD" <-> a local-time Date, for the date picker. Built from parts, never from
+// toISOString(), so the chosen day can't shift by a timezone.
+export function stringToDate(s: string | null | undefined): Date | undefined {
+  if (!s || !isRealDate(s)) return undefined;
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function dateToString(d: Date): string {
+  const y = String(d.getFullYear()).padStart(4, "0");
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}

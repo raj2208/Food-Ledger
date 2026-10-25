@@ -1,4 +1,6 @@
 import { KcalGauge } from "@/components/kcal-gauge";
+import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import type { Goals } from "@/lib/goals";
 import type { DayTotals } from "@/lib/log";
 
@@ -35,22 +37,23 @@ export function DaySummary({ totals, goals }: { totals: DayTotals; goals: Goals 
         {macros.map((m) => {
           const pct = m.goal > 0 ? Math.min(100, (m.eaten / m.goal) * 100) : 0;
           return (
-            <div key={m.label} className="rounded-2xl bg-white/30 p-3 text-center dark:bg-black/20">
-              <div className="text-sm font-medium">{m.label}</div>
-              <div
-                className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/60 dark:bg-white/20"
-                role="progressbar"
-                aria-label={m.label}
-                aria-valuemin={0}
-                aria-valuemax={Math.round(m.goal)}
-                aria-valuenow={Math.round(Math.min(m.eaten, m.goal))}
-              >
-                <div className="h-full rounded-full bg-current" style={{ width: `${pct}%` }} />
+            <Card
+              key={m.label}
+              size="sm"
+              className="gap-2 bg-white/30 text-center text-current shadow-none ring-0 dark:bg-black/20"
+            >
+              <div className="px-3 text-sm font-medium">{m.label}</div>
+              <div className="px-3">
+                <Progress
+                  value={pct}
+                  aria-label={m.label}
+                  className="[&_[data-slot=progress-indicator]]:bg-current [&_[data-slot=progress-track]]:h-1.5 [&_[data-slot=progress-track]]:bg-white/60 dark:[&_[data-slot=progress-track]]:bg-white/20"
+                />
               </div>
-              <div className="mt-2 text-xs tabular-nums">
+              <div className="px-3 text-xs tabular-nums">
                 {Math.round(m.eaten)}/{Math.round(m.goal)} g
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>

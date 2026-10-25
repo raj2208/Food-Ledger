@@ -1,8 +1,10 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
-import { ghostButtonClass } from "@/components/food-fields";
 import { PageShell } from "@/components/page-shell";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   buildMonthGrid,
   isValidMonth,
@@ -11,13 +13,14 @@ import {
   WEEKDAYS,
 } from "@/lib/calendar";
 import { listDayCaloriesForMonth, todayLocal } from "@/lib/log";
+import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Calendar · Food Ledger" };
 
 export default function CalendarPage({ searchParams }: PageProps<"/calendar">) {
   return (
     <PageShell>
-      <Suspense fallback={<p className="text-sm text-muted-foreground">Loading…</p>}>
+      <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl" />}>
         <Month searchParams={searchParams} />
       </Suspense>
     </PageShell>
@@ -42,9 +45,14 @@ async function Month({
   return (
     <div className="flex flex-col gap-6">
       <nav className="flex items-center justify-between">
-        <Link href={`/calendar?month=${shiftMonth(current, -1)}`} className={ghostButtonClass}>
-          ← Prev
-        </Link>
+        <Button
+          render={<Link href={`/calendar?month=${shiftMonth(current, -1)}`} />}
+          nativeButton={false}
+          variant="outline"
+        >
+          <ChevronLeft data-icon="inline-start" />
+          Prev
+        </Button>
         <div className="text-center">
           <div className="font-semibold">{monthLabel(current)}</div>
           <div className="text-xs text-muted-foreground">
@@ -53,9 +61,14 @@ async function Month({
               : `${loggedDays} ${loggedDays === 1 ? "day" : "days"} logged · avg ${Math.round(total / loggedDays)} kcal`}
           </div>
         </div>
-        <Link href={`/calendar?month=${shiftMonth(current, 1)}`} className={ghostButtonClass}>
-          Next →
-        </Link>
+        <Button
+          render={<Link href={`/calendar?month=${shiftMonth(current, 1)}`} />}
+          nativeButton={false}
+          variant="outline"
+        >
+          Next
+          <ChevronRight data-icon="inline-end" />
+        </Button>
       </nav>
 
       <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground">
@@ -70,14 +83,15 @@ async function Month({
           const kcal = byDay[day];
           const isToday = day === today;
           return (
-            <Link
+            <Button
               key={day}
-              href={`/?date=${day}`}
-              className={`flex aspect-square flex-col justify-between rounded-md border p-1.5 text-sm hover:bg-muted ${
-                isToday
-                  ? "border-primary bg-secondary"
-                  : "border-border"
-              }`}
+              render={<Link href={`/?date=${day}`} />}
+              nativeButton={false}
+              variant={isToday ? "secondary" : "outline"}
+              className={cn(
+                "aspect-square h-auto flex-col items-stretch justify-between p-1.5 text-left text-sm font-normal whitespace-normal",
+                isToday && "border border-primary",
+              )}
             >
               <span className={isToday ? "font-semibold" : ""}>{Number(day.slice(8))}</span>
               {kcal !== undefined ? (
@@ -86,7 +100,7 @@ async function Month({
                   <span className="hidden sm:inline"> kcal</span>
                 </span>
               ) : null}
-            </Link>
+            </Button>
           );
         })}
       </div>
