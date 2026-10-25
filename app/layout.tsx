@@ -43,6 +43,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <Link href="/" className="hover:underline">
                   Log
                 </Link>
+                <Link href="/calendar" className="hover:underline">
+                  Calendar
+                </Link>
                 <Link href="/foods" className="hover:underline">
                   Foods
                 </Link>

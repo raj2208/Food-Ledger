@@ -26,6 +26,29 @@ export async function listEntriesForDay(day: string): Promise<LogEntry[]> {
   });
 }
 
+// Calories per day ("YYYY-MM-DD" -> kcal) for a "YYYY-MM" month. Days with no logs are absent.
+export async function listDayCaloriesForMonth(
+  month: string,
+): Promise<Record<string, number>> {
+  await connection();
+  const [y, m] = month.split("-").map(Number);
+  const rows = await getPrisma().logEntry.findMany({
+    where: {
+      eatenOn: {
+        gte: new Date(Date.UTC(y, m - 1, 1)),
+        lt: new Date(Date.UTC(y, m, 1)),
+      },
+    },
+    select: { eatenOn: true, calories: true, quantity: true },
+  });
+  const byDay: Record<string, number> = {};
+  for (const r of rows) {
+    const day = r.eatenOn.toISOString().slice(0, 10);
+    byDay[day] = (byDay[day] ?? 0) + r.calories * r.quantity;
+  }
+  return byDay;
+}
+
 // The foods you log most, so repeat meals are one tap away.
 export async function listFrequentFoods(limit = 5): Promise<Food[]> {
   await connection();
