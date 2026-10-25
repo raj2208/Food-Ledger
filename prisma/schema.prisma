@@ -12,6 +12,19 @@ enum FoodKind {
   packaged
 }
 
+// The person using the app. There is no login yet, so the app shows the first user.
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String    @unique
+  dateOfBirth DateTime? @map("date_of_birth") @db.Date
+  heightCm    Float?    @map("height_cm")
+  weightKg    Float?    @map("weight_kg")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
 // A single row (id = 1): the daily targets shown on the home page.
 model DailyGoals {
   id        Int      @id @default(1)
