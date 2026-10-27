@@ -1,11 +1,10 @@
 import { Suspense } from "react";
 import { saveGoals } from "@/app/actions";
+import { ActionForm, FieldErrorMessage, FormInput, SubmitButton } from "@/components/action-form";
 import { FreshOnOpen } from "@/components/fresh-on-open";
 import { PageShell } from "@/components/page-shell";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getGoals } from "@/lib/goals";
 
@@ -41,12 +40,12 @@ async function GoalsForm() {
   ];
   return (
     <FreshOnOpen>
-      <form action={saveGoals} className="flex flex-col gap-4">
+      <ActionForm action={saveGoals} successMessage="Goals saved" redirectTo="/" className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {fields.map((f) => (
             <Field key={f.name}>
               <FieldLabel htmlFor={`goal-${f.name}`}>{f.label}</FieldLabel>
-              <Input
+              <FormInput
                 id={`goal-${f.name}`}
                 name={f.name}
                 type="number"
@@ -55,13 +54,14 @@ async function GoalsForm() {
                 required
                 defaultValue={f.value}
               />
+              <FieldErrorMessage id={`goal-${f.name}`} name={f.name} />
             </Field>
           ))}
         </div>
         <div>
-          <Button type="submit">Save goals</Button>
+          <SubmitButton>Save goals</SubmitButton>
         </div>
-      </form>
+      </ActionForm>
     </FreshOnOpen>
   );
 }

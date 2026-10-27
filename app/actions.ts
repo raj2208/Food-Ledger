@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { fail, succeed, type ActionResult } from "@/lib/action-result";
 import { saveGoalsRow } from "@/lib/goals";
+import { parseGoals } from "@/lib/goals-input";
 import {
   deleteFoodRow,
   getFoodRow,
@@ -82,18 +84,18 @@ export async function logFood(formData: FormData) {
   refresh();
 }
 
-export async function saveGoals(formData: FormData) {
-  const calories = number(formData, "calories");
-  if (calories <= 0) throw new Error("Calorie goal must be greater than 0");
-  await saveGoalsRow({
-    calories,
-    carbsG: number(formData, "carbs_g"),
-    proteinG: number(formData, "protein_g"),
-    fatG: number(formData, "fat_g"),
+export async function saveGoals(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  const parsed = parseGoals({
+    calories: text(formData, "calories"),
+    carbs_g: text(formData, "carbs_g"),
+    protein_g: text(formData, "protein_g"),
+    fat_g: text(formData, "fat_g"),
   });
+  if (!parsed.ok) return fail("Please fix the highlighted fields.", parsed.fieldErrors);
+  await saveGoalsRow(parsed.value);
   refresh();
   revalidatePath("/goals");
-  redirect("/");
+  return succeed("Goals saved");
 }
 
 export async function updateProfile(formData: FormData) {

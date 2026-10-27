@@ -139,6 +139,12 @@
   }
 }
 
+/* Keep toasts above the fixed bottom tab bar (shadcn pins them to bottom-4). Unlayered, so it
+   wins over Tailwind's utilities without editing the vendored toast component. */
+[data-slot="toast-viewport"] {
+  bottom: calc(5.5rem + env(safe-area-inset-bottom));
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
