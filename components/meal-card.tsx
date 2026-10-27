@@ -1,7 +1,8 @@
 import { Coffee, Cookie, Minus, Plus, Salad, Soup, Utensils } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { deleteEntry } from "@/app/actions";
+import { deleteEntry, updateEntry } from "@/app/actions";
+import { EditEntryDialog } from "@/components/edit-entry-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
@@ -87,6 +88,14 @@ export function MealCard({ meal, title, recommended, entries, isOpen = false, to
                     </ItemContent>
                     <ItemActions>
                       <span className="text-sm tabular-nums">{Math.round(e.calories * e.quantity)} kcal</span>
+                      <EditEntryDialog
+                        entryId={e.id}
+                        foodName={e.foodName}
+                        servingLabel={e.servingLabel}
+                        quantity={e.quantity}
+                        meal={e.meal}
+                        action={updateEntry.bind(null, e.id)}
+                      />
                       <form action={deleteEntry.bind(null, e.id)}>
                         <Button type="submit" variant="outline" size="sm">
                           Remove
