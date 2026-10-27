@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { fail, succeed, type ActionResult } from "@/lib/action-result";
 import { saveGoalsRow } from "@/lib/goals";
 import { parseGoals } from "@/lib/goals-input";
@@ -16,7 +15,7 @@ import {
 import { deleteEntryRow, insertEntry, isMeal, isValidDay, todayLocal, updateEntryRow } from "@/lib/log";
 import { parseEntryEdit } from "@/lib/meals";
 import { parseProfile } from "@/lib/profile";
-import { getCurrentUser, updateUserRow } from "@/lib/users";
+import { getCurrentUser, isUniqueViolation, updateUserRow } from "@/lib/users";
 
 function text(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -98,9 +97,9 @@ export async function saveGoals(_prev: ActionResult | null, formData: FormData):
   return succeed("Goals saved");
 }
 
-export async function updateProfile(formData: FormData) {
+export async function updateProfile(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const user = await getCurrentUser();
-  if (!user) throw new Error("No profile to update");
+  if (!user) return fail("No profile to update.");
   const parsed = parseProfile(
     {
       name: text(formData, "name"),
@@ -111,10 +110,17 @@ export async function updateProfile(formData: FormData) {
     },
     todayLocal(),
   );
-  if (!parsed.ok) throw new Error(parsed.error);
-  await updateUserRow(user.id, parsed.value);
+  if (!parsed.ok) return fail("Please fix the highlighted fields.", parsed.fieldErrors);
+  try {
+    await updateUserRow(user.id, parsed.value);
+  } catch (e) {
+    if (isUniqueViolation(e)) {
+      return fail("Please fix the highlighted fields.", { email: "That email is already in use" });
+    }
+    throw e;
+  }
   revalidatePath("/profile");
-  redirect("/profile");
+  return succeed("Profile saved");
 }
 
 export async function updateEntry(id: number, formData: FormData) {

@@ -3,6 +3,7 @@
 import { format } from "date-fns";
 import { CalendarIcon, XIcon } from "lucide-react";
 import { useState } from "react";
+import { useFormState } from "@/components/action-form";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -20,6 +21,8 @@ type Props = {
 export function DatePicker({ id, name, defaultValue, min, max }: Props) {
   const [date, setDate] = useState<Date | undefined>(() => stringToDate(defaultValue));
   const [open, setOpen] = useState(false);
+  const { fieldErrors } = useFormState();
+  const error = fieldErrors[name];
   const earliest = stringToDate(min);
   const latest = stringToDate(max);
 
@@ -35,6 +38,8 @@ export function DatePicker({ id, name, defaultValue, min, max }: Props) {
               variant="outline"
               className="flex-1 justify-start font-normal data-[empty=true]:text-muted-foreground"
               data-empty={!date}
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? `${id}-error` : undefined}
             />
           }
         >

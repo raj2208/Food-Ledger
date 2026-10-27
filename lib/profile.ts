@@ -44,7 +44,10 @@ export type RawProfile = {
   weightKg: string;
 };
 
-export type ProfileResult = { ok: true; value: ProfileInput } | { ok: false; error: string };
+// Errors are keyed by the form input's `name`, and report every bad field at once.
+export type ProfileResult =
+  | { ok: true; value: ProfileInput }
+  | { ok: false; fieldErrors: Record<string, string> };
 
 export const PROFILE_LIMITS = {
   heightCm: { min: 50, max: 272 },
@@ -70,32 +73,46 @@ function optionalNumber(raw: string, label: string, min: number, max: number, un
 
 // `today` is "YYYY-MM-DD" in the user's local day, passed in so this stays pure and testable.
 export function parseProfile(raw: RawProfile, today: string): ProfileResult {
+  const fieldErrors: Record<string, string> = {};
+
   const name = raw.name.trim();
-  if (name === "") return { ok: false, error: "Name is required" };
-  if (name.length > 100) return { ok: false, error: "Name must be 100 characters or fewer" };
+  if (name === "") fieldErrors.name = "Name is required";
+  else if (name.length > 100) fieldErrors.name = "Name must be 100 characters or fewer";
 
   const email = raw.email.trim().toLowerCase();
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { ok: false, error: "Enter a valid email address" };
+    fieldErrors.email = "Enter a valid email address";
   }
 
   let dateOfBirth: string | null = null;
   if (raw.dateOfBirth !== "") {
-    if (!isRealDate(raw.dateOfBirth)) return { ok: false, error: "Enter a valid date of birth" };
-    if (raw.dateOfBirth < PROFILE_LIMITS.earliestBirthDate || raw.dateOfBirth > today) {
-      return { ok: false, error: "Date of birth must be between 1900 and today" };
+    if (!isRealDate(raw.dateOfBirth)) {
+      fieldErrors.date_of_birth = "Enter a valid date of birth";
+    } else if (raw.dateOfBirth < PROFILE_LIMITS.earliestBirthDate || raw.dateOfBirth > today) {
+      fieldErrors.date_of_birth = "Date of birth must be between 1900 and today";
+    } else {
+      dateOfBirth = raw.dateOfBirth;
     }
-    dateOfBirth = raw.dateOfBirth;
   }
 
   const h = PROFILE_LIMITS.heightCm;
   const height = optionalNumber(raw.heightCm, "Height", h.min, h.max, "cm");
-  if (!height.ok) return height;
+  if (!height.ok) fieldErrors.height_cm = height.error;
   const w = PROFILE_LIMITS.weightKg;
   const weight = optionalNumber(raw.weightKg, "Weight", w.min, w.max, "kg");
-  if (!weight.ok) return weight;
+  if (!weight.ok) fieldErrors.weight_kg = weight.error;
 
-  return { ok: true, value: { name, email, dateOfBirth, heightCm: height.value, weightKg: weight.value } };
+  if (Object.keys(fieldErrors).length > 0) return { ok: false, fieldErrors };
+  return {
+    ok: true,
+    value: {
+      name,
+      email,
+      dateOfBirth,
+      heightCm: height.ok ? height.value : null,
+      weightKg: weight.ok ? weight.value : null,
+    },
+  };
 }
 
 // "YYYY-MM-DD" <-> a local-time Date, for the date picker. Built from parts, never from

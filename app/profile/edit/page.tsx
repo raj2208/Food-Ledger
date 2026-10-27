@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { updateProfile } from "@/app/actions";
+import { ActionForm, FieldErrorMessage, FormInput, SubmitButton } from "@/components/action-form";
 import { DatePicker } from "@/components/date-picker";
 import { FreshOnOpen } from "@/components/fresh-on-open";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { todayLocal } from "@/lib/log";
 import { PROFILE_LIMITS } from "@/lib/profile";
@@ -40,14 +40,15 @@ async function EditForm() {
 
   return (
     <FreshOnOpen>
-      <form action={updateProfile} className="flex flex-col gap-4">
+      <ActionForm action={updateProfile} successMessage="Profile saved" redirectTo="/profile" className="flex flex-col gap-4">
         <Field>
           <FieldLabel htmlFor="profile-name">Name</FieldLabel>
-          <Input id="profile-name" name="name" required maxLength={100} defaultValue={user.name} />
+          <FormInput id="profile-name" name="name" required maxLength={100} defaultValue={user.name} />
+          <FieldErrorMessage id="profile-name" name="name" />
         </Field>
         <Field>
           <FieldLabel htmlFor="profile-email">Email</FieldLabel>
-          <Input
+          <FormInput
             id="profile-email"
             name="email"
             type="email"
@@ -55,6 +56,7 @@ async function EditForm() {
             maxLength={254}
             defaultValue={user.email}
           />
+          <FieldErrorMessage id="profile-email" name="email" />
         </Field>
         <Field>
           <FieldLabel htmlFor="profile-dob">Date of birth (optional)</FieldLabel>
@@ -65,11 +67,12 @@ async function EditForm() {
             max={todayLocal()}
             defaultValue={user.dateOfBirth ? user.dateOfBirth.toISOString().slice(0, 10) : null}
           />
+          <FieldErrorMessage id="profile-dob" name="date_of_birth" />
         </Field>
         <div className="grid grid-cols-2 gap-4">
           <Field>
             <FieldLabel htmlFor="profile-height">Height in cm (optional)</FieldLabel>
-            <Input
+            <FormInput
               id="profile-height"
               name="height_cm"
               type="number"
@@ -78,10 +81,11 @@ async function EditForm() {
               step="any"
               defaultValue={user.heightCm ?? ""}
             />
+            <FieldErrorMessage id="profile-height" name="height_cm" />
           </Field>
           <Field>
             <FieldLabel htmlFor="profile-weight">Weight in kg (optional)</FieldLabel>
-            <Input
+            <FormInput
               id="profile-weight"
               name="weight_kg"
               type="number"
@@ -90,15 +94,16 @@ async function EditForm() {
               step="any"
               defaultValue={user.weightKg ?? ""}
             />
+            <FieldErrorMessage id="profile-weight" name="weight_kg" />
           </Field>
         </div>
         <div className="flex items-center gap-3">
-          <Button type="submit">Save changes</Button>
+          <SubmitButton>Save changes</SubmitButton>
           <Button render={<Link href="/profile" />} nativeButton={false} variant="outline">
             Cancel
           </Button>
         </div>
-      </form>
+      </ActionForm>
     </FreshOnOpen>
   );
 }
