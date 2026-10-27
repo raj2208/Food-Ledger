@@ -3,11 +3,10 @@
 import { useRouter } from "next/navigation";
 import {
   createContext,
-  startTransition,
-  useActionState,
+  Fragment,
   useContext,
-  useEffect,
-  useRef,
+  useState,
+  useTransition,
   type ComponentProps,
   type FormEvent,
   type ReactNode,
@@ -18,9 +17,9 @@ import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
-import type { ActionResult } from "@/lib/action-result";
+import { fail, type ActionResult } from "@/lib/action-result";
 
-type FormAction = (prev: ActionResult | null, formData: FormData) => Promise<ActionResult>;
+type FormAction = (formData: FormData) => Promise<ActionResult>;
 
 type FormState = { fieldErrors: Record<string, string>; pending: boolean };
 const FormStateContext = createContext<FormState>({ fieldErrors: {}, pending: false });
@@ -48,43 +47,41 @@ export function ActionForm({
   className,
   children,
 }: Props) {
-  const [state, run, pending] = useActionState(action, null);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [result, setResult] = useState<ActionResult | null>(null);
+  const [resetCount, setResetCount] = useState(0);
+  const [pending, startTransition] = useTransition();
   const router = useRouter();
-  const handled = useRef<ActionResult | null>(null);
-  const onSuccessRef = useRef(onSuccess);
-
-  useEffect(() => {
-    onSuccessRef.current = onSuccess;
-  });
-
-  useEffect(() => {
-    if (!state || handled.current === state) return; // react to each result once
-    handled.current = state;
-    if (!state.ok) return;
-    toast.add({ title: state.message ?? successMessage, type: "success", timeout: 3500 });
-    if (resetOnSuccess) formRef.current?.reset();
-    onSuccessRef.current?.();
-    if (redirectTo) router.push(redirectTo);
-  }, [state, successMessage, resetOnSuccess, redirectTo, router]);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    startTransition(() => run(formData));
+    startTransition(async () => {
+      let next: ActionResult;
+      try {
+        next = await action(formData);
+      } catch {
+        next = fail("Something went wrong. Please try again.");
+      }
+      setResult(next);
+      if (!next.ok) return;
+      toast.add({ title: next.message ?? successMessage, type: "success", timeout: 3500 });
+      if (resetOnSuccess) setResetCount((c) => c + 1); // remount the fields so they start empty
+      onSuccess?.();
+      if (redirectTo) router.push(redirectTo);
+    });
   }
 
-  const failed = state && !state.ok ? state : null;
+  const failed = result && !result.ok ? result : null;
 
   return (
     <FormStateContext.Provider value={{ fieldErrors: failed?.fieldErrors ?? {}, pending }}>
-      <form ref={formRef} onSubmit={onSubmit} className={className}>
+      <form onSubmit={onSubmit} className={className}>
         {failed ? (
           <Alert variant="destructive" role="alert">
             <AlertDescription>{failed.error}</AlertDescription>
           </Alert>
         ) : null}
-        {children}
+        <Fragment key={resetCount}>{children}</Fragment>
       </form>
     </FormStateContext.Provider>
   );

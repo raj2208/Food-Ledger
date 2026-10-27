@@ -1,10 +1,11 @@
 import { ChevronDown } from "lucide-react";
 import { Suspense } from "react";
 import { createFood, deleteFood, updateFood } from "@/app/actions";
+import { ActionForm, SubmitButton } from "@/components/action-form";
+import { DeleteFoodButton } from "@/components/delete-food-button";
 import { FoodFields } from "@/components/food-fields";
 import { PageShell } from "@/components/page-shell";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ItemGroup, ItemSeparator } from "@/components/ui/item";
@@ -22,12 +23,12 @@ export default function FoodsPage() {
             <CardTitle>Add a food</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={createFood} className="flex flex-col gap-4">
+            <ActionForm action={createFood} successMessage="Food saved" resetOnSuccess className="flex flex-col gap-4">
               <FoodFields idPrefix="add" />
               <div>
-                <Button type="submit">Save food</Button>
+                <SubmitButton>Save food</SubmitButton>
               </div>
-            </form>
+            </ActionForm>
           </CardContent>
         </Card>
 
@@ -78,23 +79,16 @@ async function FoodList() {
             <CollapsibleContent>
               <div className="flex flex-col gap-4 pb-3">
                 {f.notes ? <p className="text-xs italic text-muted-foreground">{f.notes}</p> : null}
-                <form action={updateFood.bind(null, f.id)} className="flex flex-col gap-4">
+                <ActionForm action={updateFood.bind(null, f.id)} className="flex flex-col gap-4">
                   <FoodFields food={f} idPrefix={`edit-${f.id}`} />
                   <p className="text-xs text-muted-foreground">
                     Changes apply to future logs only. Past entries keep the values they were logged with.
                   </p>
                   <div className="flex gap-2">
-                    <Button type="submit">Update</Button>
-                    <Button
-                      type="submit"
-                      variant="destructive"
-                      formAction={deleteFood.bind(null, f.id)}
-                      formNoValidate
-                    >
-                      Delete
-                    </Button>
+                    <SubmitButton>Update</SubmitButton>
+                    <DeleteFoodButton id={f.id} name={f.name} action={deleteFood} />
                   </div>
-                </form>
+                </ActionForm>
               </div>
             </CollapsibleContent>
           </Collapsible>

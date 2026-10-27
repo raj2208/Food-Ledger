@@ -3,14 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { fail, succeed, type ActionResult } from "@/lib/action-result";
 import { saveGoalsRow } from "@/lib/goals";
+import { parseFoodInput } from "@/lib/food-input";
 import { parseGoals } from "@/lib/goals-input";
 import {
   deleteFoodRow,
   getFoodRow,
   insertFood,
   updateFoodRow,
-  type FoodInput,
-  type FoodKind,
 } from "@/lib/foods";
 import { deleteEntryRow, insertEntry, isMeal, isValidDay, todayLocal, updateEntryRow } from "@/lib/log";
 import { parseEntryEdit } from "@/lib/meals";
@@ -30,24 +29,18 @@ function number(formData: FormData, key: string, fallback?: number): number {
   return n;
 }
 
-function parseFood(formData: FormData): FoodInput {
-  const name = text(formData, "name");
-  if (!name) throw new Error("Name is required");
-  const kind = text(formData, "kind");
-  if (kind !== "homemade" && kind !== "packaged") {
-    throw new Error("Invalid food kind");
-  }
-  return {
-    name,
-    kind: kind as FoodKind,
-    barcode: text(formData, "barcode") || null,
-    servingLabel: text(formData, "serving_label") || "1 serving",
-    calories: number(formData, "calories"),
-    proteinG: number(formData, "protein_g", 0),
-    carbsG: number(formData, "carbs_g", 0),
-    fatG: number(formData, "fat_g", 0),
-    notes: text(formData, "notes") || null,
-  };
+function parseFood(formData: FormData) {
+  return parseFoodInput({
+    name: text(formData, "name"),
+    kind: text(formData, "kind"),
+    serving_label: text(formData, "serving_label"),
+    calories: text(formData, "calories"),
+    protein_g: text(formData, "protein_g"),
+    carbs_g: text(formData, "carbs_g"),
+    fat_g: text(formData, "fat_g"),
+    barcode: text(formData, "barcode"),
+    notes: text(formData, "notes"),
+  });
 }
 
 function refresh() {
@@ -55,19 +48,26 @@ function refresh() {
   revalidatePath("/foods");
 }
 
-export async function createFood(formData: FormData) {
-  await insertFood(parseFood(formData));
+export async function createFood(formData: FormData): Promise<ActionResult> {
+  const parsed = parseFood(formData);
+  if (!parsed.ok) return fail("Please fix the highlighted fields.", parsed.fieldErrors);
+  await insertFood(parsed.value);
   refresh();
+  return succeed(`Saved ${parsed.value.name}`);
 }
 
-export async function updateFood(id: number, formData: FormData) {
-  await updateFoodRow(id, parseFood(formData));
+export async function updateFood(id: number, formData: FormData): Promise<ActionResult> {
+  const parsed = parseFood(formData);
+  if (!parsed.ok) return fail("Please fix the highlighted fields.", parsed.fieldErrors);
+  await updateFoodRow(id, parsed.value);
   refresh();
+  return succeed(`Updated ${parsed.value.name}`);
 }
 
-export async function deleteFood(id: number) {
+export async function deleteFood(id: number, name: string): Promise<ActionResult> {
   await deleteFoodRow(id);
   refresh();
+  return succeed(`Deleted ${name}`);
 }
 
 export async function logFood(formData: FormData) {
@@ -83,7 +83,7 @@ export async function logFood(formData: FormData) {
   refresh();
 }
 
-export async function saveGoals(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+export async function saveGoals(formData: FormData): Promise<ActionResult> {
   const parsed = parseGoals({
     calories: text(formData, "calories"),
     carbs_g: text(formData, "carbs_g"),
@@ -97,7 +97,7 @@ export async function saveGoals(_prev: ActionResult | null, formData: FormData):
   return succeed("Goals saved");
 }
 
-export async function updateProfile(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+export async function updateProfile(formData: FormData): Promise<ActionResult> {
   const user = await getCurrentUser();
   if (!user) return fail("No profile to update.");
   const parsed = parseProfile(

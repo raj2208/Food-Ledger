@@ -1,5 +1,5 @@
+import { FieldErrorMessage, FormInput } from "@/components/action-form";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -14,6 +14,7 @@ const KINDS = [
   { value: "packaged", label: "Packaged" },
 ];
 
+// Meant to sit inside an <ActionForm>, which supplies the per-field error messages.
 // idPrefix keeps the field ids unique when several food forms share one page.
 export function FoodFields({ food, idPrefix }: { food?: Food; idPrefix: string }) {
   const id = (field: string) => `${idPrefix}-${field}`;
@@ -29,7 +30,8 @@ export function FoodFields({ food, idPrefix }: { food?: Food; idPrefix: string }
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
       <Field className="col-span-2">
         <FieldLabel htmlFor={id("name")}>Name</FieldLabel>
-        <Input id={id("name")} name="name" required defaultValue={food?.name} />
+        <FormInput id={id("name")} name="name" required defaultValue={food?.name} />
+        <FieldErrorMessage id={id("name")} name="name" />
       </Field>
 
       <Field>
@@ -46,22 +48,24 @@ export function FoodFields({ food, idPrefix }: { food?: Food; idPrefix: string }
             ))}
           </SelectContent>
         </Select>
+        <FieldErrorMessage id={id("kind")} name="kind" />
       </Field>
 
       <Field>
         <FieldLabel htmlFor={id("serving")}>Serving</FieldLabel>
-        <Input
+        <FormInput
           id={id("serving")}
           name="serving_label"
           placeholder="1 bowl"
           defaultValue={food?.servingLabel}
         />
+        <FieldErrorMessage id={id("serving")} name="serving_label" />
       </Field>
 
       {numbers.map((n) => (
         <Field key={n.name}>
           <FieldLabel htmlFor={id(n.name)}>{n.label}</FieldLabel>
-          <Input
+          <FormInput
             id={id(n.name)}
             name={n.name}
             type="number"
@@ -70,22 +74,25 @@ export function FoodFields({ food, idPrefix }: { food?: Food; idPrefix: string }
             required={n.required}
             defaultValue={n.value}
           />
+          <FieldErrorMessage id={id(n.name)} name={n.name} />
         </Field>
       ))}
 
       <Field className="col-span-2">
         <FieldLabel htmlFor={id("barcode")}>Barcode (optional)</FieldLabel>
-        <Input id={id("barcode")} name="barcode" defaultValue={food?.barcode ?? ""} />
+        <FormInput id={id("barcode")} name="barcode" defaultValue={food?.barcode ?? ""} />
+        <FieldErrorMessage id={id("barcode")} name="barcode" />
       </Field>
 
       <Field className="col-span-2 sm:col-span-4">
         <FieldLabel htmlFor={id("notes")}>Notes (optional)</FieldLabel>
-        <Input
+        <FormInput
           id={id("notes")}
           name="notes"
           placeholder="e.g. less oil, from the corner shop"
           defaultValue={food?.notes ?? ""}
         />
+        <FieldErrorMessage id={id("notes")} name="notes" />
       </Field>
     </div>
   );
