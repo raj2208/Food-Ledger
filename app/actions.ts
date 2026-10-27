@@ -11,7 +11,8 @@ import {
   type FoodInput,
   type FoodKind,
 } from "@/lib/foods";
-import { deleteEntryRow, insertEntry, isMeal, isValidDay, todayLocal } from "@/lib/log";
+import { deleteEntryRow, insertEntry, isMeal, isValidDay, todayLocal, updateEntryRow } from "@/lib/log";
+import { parseEntryEdit } from "@/lib/meals";
 import { parseProfile } from "@/lib/profile";
 import { getCurrentUser, updateUserRow } from "@/lib/users";
 
@@ -112,6 +113,16 @@ export async function updateProfile(formData: FormData) {
   await updateUserRow(user.id, parsed.value);
   revalidatePath("/profile");
   redirect("/profile");
+}
+
+export async function updateEntry(id: number, formData: FormData) {
+  const parsed = parseEntryEdit({
+    quantity: text(formData, "quantity"),
+    meal: text(formData, "meal"),
+  });
+  if (!parsed.ok) throw new Error(parsed.error);
+  await updateEntryRow(id, parsed.value);
+  refresh();
 }
 
 export async function deleteEntry(id: number) {

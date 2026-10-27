@@ -3,20 +3,13 @@ import { cache } from "react";
 import type { LogEntry } from "@/generated/prisma/client";
 import type { MealType } from "@/generated/prisma/enums";
 import { getPrisma } from "./prisma";
+import type { EntryEdit } from "./meals";
 import type { Food } from "./foods";
 
 export type { LogEntry, MealType };
 
-export const MEALS: { value: MealType; label: string }[] = [
-  { value: "breakfast", label: "Breakfast" },
-  { value: "lunch", label: "Lunch" },
-  { value: "dinner", label: "Dinner" },
-  { value: "snack", label: "Snack" },
-];
-
-export function isMeal(s: string): s is MealType {
-  return MEALS.some((m) => m.value === s);
-}
+// The meal list lives in ./meals (no database imports); re-exported so callers are unchanged.
+export { MEALS, isMeal } from "./meals";
 
 // Values are per-serving snapshots; totals are per-serving * quantity.
 export type DayTotals = {
@@ -111,6 +104,14 @@ export async function insertEntry(
       carbsG: food.carbsG,
       fatG: food.fatG,
     },
+  });
+}
+
+// Only servings and meal change; the nutrition snapshot taken when it was logged stays as is.
+export async function updateEntryRow(id: number, edit: EntryEdit): Promise<void> {
+  await getPrisma().logEntry.update({
+    where: { id },
+    data: { quantity: edit.quantity, meal: edit.meal },
   });
 }
 
