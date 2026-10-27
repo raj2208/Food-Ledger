@@ -12,21 +12,13 @@ import {
   updateFoodRow,
 } from "@/lib/foods";
 import { deleteEntryRow, insertEntry, isMeal, isValidDay, todayLocal, updateEntryRow } from "@/lib/log";
-import { parseEntryEdit } from "@/lib/meals";
+import { parseEntryEdit, parseQuantity } from "@/lib/meals";
 import { parseProfile } from "@/lib/profile";
 import { getCurrentUser, isUniqueViolation, updateUserRow } from "@/lib/users";
 
 function text(formData: FormData, key: string): string {
   const v = formData.get(key);
   return typeof v === "string" ? v.trim() : "";
-}
-
-function number(formData: FormData, key: string, fallback?: number): number {
-  const raw = text(formData, key);
-  if (raw === "" && fallback !== undefined) return fallback;
-  const n = Number(raw);
-  if (!Number.isFinite(n) || n < 0) throw new Error(`Invalid value for ${key}`);
-  return n;
 }
 
 function parseFood(formData: FormData) {
@@ -70,17 +62,19 @@ export async function deleteFood(id: number, name: string): Promise<ActionResult
   return succeed(`Deleted ${name}`);
 }
 
-export async function logFood(formData: FormData) {
+export async function logFood(formData: FormData): Promise<ActionResult> {
+  // Quick-add posts "1"; a blank servings box on the full form means 1 too.
+  const quantity = parseQuantity(text(formData, "quantity") || "1");
+  if (!quantity.ok) return fail("Please fix the highlighted fields.", { quantity: quantity.error });
   const food = await getFoodRow(Number(text(formData, "food_id")));
-  if (!food) throw new Error("Pick a food to log");
+  if (!food) return fail("That food no longer exists. Refresh and try again.");
   const day = text(formData, "day");
-  if (!isValidDay(day)) throw new Error("Invalid date");
+  if (!isValidDay(day)) return fail("That date isn't valid.");
   const meal = text(formData, "meal");
-  if (!isMeal(meal)) throw new Error("Pick breakfast, lunch or dinner");
-  const quantity = number(formData, "quantity", 1);
-  if (quantity <= 0) throw new Error("Quantity must be greater than 0");
-  await insertEntry(food, day, meal, quantity);
+  if (!isMeal(meal)) return fail("Pick breakfast, lunch, dinner or snack.");
+  await insertEntry(food, day, meal, quantity.value);
   refresh();
+  return succeed(`Added ${food.name} to ${meal}`);
 }
 
 export async function saveGoals(formData: FormData): Promise<ActionResult> {
@@ -123,14 +117,15 @@ export async function updateProfile(formData: FormData): Promise<ActionResult> {
   return succeed("Profile saved");
 }
 
-export async function updateEntry(id: number, formData: FormData) {
+export async function updateEntry(id: number, formData: FormData): Promise<ActionResult> {
   const parsed = parseEntryEdit({
     quantity: text(formData, "quantity"),
     meal: text(formData, "meal"),
   });
-  if (!parsed.ok) throw new Error(parsed.error);
+  if (!parsed.ok) return fail("Please fix the highlighted fields.", { [parsed.field]: parsed.error });
   await updateEntryRow(id, parsed.value);
   refresh();
+  return succeed("Entry updated");
 }
 
 export async function deleteEntry(id: number) {

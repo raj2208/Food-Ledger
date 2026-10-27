@@ -2,6 +2,7 @@
 
 import { PencilIcon } from "lucide-react";
 import { useState } from "react";
+import { ActionForm, FieldErrorMessage, FormInput, SubmitButton } from "@/components/action-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,8 +15,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ActionResult } from "@/lib/action-result";
 import { MAX_SERVINGS, MEALS, type MealType } from "@/lib/meals";
 
 type Props = {
@@ -24,7 +25,7 @@ type Props = {
   servingLabel: string;
   quantity: number;
   meal: MealType | null; // null = logged before meals existed: the user must pick one
-  action: (formData: FormData) => Promise<void>;
+  action: (formData: FormData) => Promise<ActionResult>;
 };
 
 // Change an entry's servings or meal. The dialog content only exists while open, so every
@@ -47,16 +48,15 @@ export function EditEntryDialog({ entryId, foodName, servingLabel, quantity, mea
             {foodName} · {servingLabel}
           </DialogDescription>
         </DialogHeader>
-        <form
-          action={async (formData) => {
-            await action(formData);
-            setOpen(false);
-          }}
+        <ActionForm
+          action={action}
+          successMessage="Entry updated"
+          onSuccess={() => setOpen(false)}
           className="flex flex-col gap-4"
         >
           <Field>
             <FieldLabel htmlFor={id("quantity")}>Servings</FieldLabel>
-            <Input
+            <FormInput
               id={id("quantity")}
               name="quantity"
               type="number"
@@ -66,6 +66,7 @@ export function EditEntryDialog({ entryId, foodName, servingLabel, quantity, mea
               required
               defaultValue={quantity}
             />
+            <FieldErrorMessage id={id("quantity")} name="quantity" />
           </Field>
           <Field>
             <FieldLabel htmlFor={id("meal")}>Meal</FieldLabel>
@@ -81,12 +82,13 @@ export function EditEntryDialog({ entryId, foodName, servingLabel, quantity, mea
                 ))}
               </SelectContent>
             </Select>
+            <FieldErrorMessage id={id("meal")} name="meal" />
           </Field>
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>Cancel</DialogClose>
-            <Button type="submit">Save changes</Button>
+            <SubmitButton>Save changes</SubmitButton>
           </DialogFooter>
-        </form>
+        </ActionForm>
       </DialogContent>
     </Dialog>
   );

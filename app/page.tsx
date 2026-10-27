@@ -3,12 +3,12 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
 import { logFood } from "@/app/actions";
+import { ActionForm, FieldErrorMessage, FormInput, SubmitButton } from "@/components/action-form";
 import { DaySummary } from "@/components/day-summary";
 import { MealCard } from "@/components/meal-card";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { dayLabel } from "@/lib/calendar";
@@ -171,52 +171,58 @@ function LogControls({
           <div className="mb-2 text-xs font-medium text-muted-foreground">Quick add · 1 serving</div>
           <div className="flex flex-wrap gap-2">
             {frequent.map((f) => (
-              <form key={f.id} action={logFood}>
+              <ActionForm key={f.id} action={logFood} errorsAs="toast">
                 <input type="hidden" name="day" value={day} />
                 <input type="hidden" name="meal" value={meal} />
                 <input type="hidden" name="food_id" value={f.id} />
                 <input type="hidden" name="quantity" value="1" />
-                <Button type="submit" variant="outline">
+                <SubmitButton variant="outline" pendingLabel="Adding…">
                   {f.name} · {Math.round(f.calories)} kcal
-                </Button>
-              </form>
+                </SubmitButton>
+              </ActionForm>
             ))}
           </div>
         </div>
       ) : null}
 
-      <form action={logFood} className="flex flex-wrap items-end gap-3">
+      <ActionForm action={logFood} resetOnSuccess className="flex flex-col gap-3">
         <input type="hidden" name="day" value={day} />
         <input type="hidden" name="meal" value={meal} />
-        <Field className="min-w-48 flex-1">
-          <FieldLabel htmlFor={`${meal}-food`}>Food</FieldLabel>
-          <Select name="food_id" required items={foodItems} defaultValue={foodItems[0].value}>
-            <SelectTrigger id={`${meal}-food`} className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {foodItems.map((f) => (
-                <SelectItem key={f.value} value={f.value}>
-                  {f.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field className="w-28">
-          <FieldLabel htmlFor={`${meal}-quantity`}>Servings</FieldLabel>
-          <Input
-            id={`${meal}-quantity`}
-            name="quantity"
-            type="number"
-            min="0.01"
-            step="any"
-            defaultValue={1}
-            required
-          />
-        </Field>
-        <Button type="submit">Add to {mealLabel}</Button>
-      </form>
+        <div className="flex flex-wrap items-start gap-3">
+          <Field className="min-w-48 flex-1">
+            <FieldLabel htmlFor={`${meal}-food`}>Food</FieldLabel>
+            <Select name="food_id" required items={foodItems} defaultValue={foodItems[0].value}>
+              <SelectTrigger id={`${meal}-food`} className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {foodItems.map((f) => (
+                  <SelectItem key={f.value} value={f.value}>
+                    {f.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldErrorMessage id={`${meal}-food`} name="food_id" />
+          </Field>
+          <Field className="w-28">
+            <FieldLabel htmlFor={`${meal}-quantity`}>Servings</FieldLabel>
+            <FormInput
+              id={`${meal}-quantity`}
+              name="quantity"
+              type="number"
+              min="0.01"
+              step="any"
+              defaultValue={1}
+              required
+            />
+            <FieldErrorMessage id={`${meal}-quantity`} name="quantity" />
+          </Field>
+        </div>
+        <div>
+          <SubmitButton pendingLabel="Adding…">Add to {mealLabel}</SubmitButton>
+        </div>
+      </ActionForm>
     </div>
   );
 }

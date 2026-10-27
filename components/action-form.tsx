@@ -30,6 +30,7 @@ type Props = {
   successMessage?: string; // toast title when the action does not supply its own message
   redirectTo?: string; // go here after a successful save
   resetOnSuccess?: boolean; // clear the fields after a successful save (e.g. "add" forms)
+  errorsAs?: "inline" | "toast"; // toast: for tiny forms with no fields to put an error next to
   onSuccess?: () => void;
   className?: string;
   children: ReactNode;
@@ -43,6 +44,7 @@ export function ActionForm({
   successMessage = "Saved",
   redirectTo,
   resetOnSuccess,
+  errorsAs = "inline",
   onSuccess,
   className,
   children,
@@ -63,7 +65,10 @@ export function ActionForm({
         next = fail("Something went wrong. Please try again.");
       }
       setResult(next);
-      if (!next.ok) return;
+      if (!next.ok) {
+        if (errorsAs === "toast") toast.add({ title: next.error, type: "error", timeout: 5000 });
+        return;
+      }
       toast.add({ title: next.message ?? successMessage, type: "success", timeout: 3500 });
       if (resetOnSuccess) setResetCount((c) => c + 1); // remount the fields so they start empty
       onSuccess?.();
@@ -76,7 +81,7 @@ export function ActionForm({
   return (
     <FormStateContext.Provider value={{ fieldErrors: failed?.fieldErrors ?? {}, pending }}>
       <form onSubmit={onSubmit} className={className}>
-        {failed ? (
+        {failed && errorsAs === "inline" ? (
           <Alert variant="destructive" role="alert">
             <AlertDescription>{failed.error}</AlertDescription>
           </Alert>
