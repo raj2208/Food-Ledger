@@ -90,7 +90,9 @@ export function CaloriesChart({ series, goal }: { series: SeriesDay[]; goal: num
         <span aria-hidden="true" className="inline-block w-6 border-t-2 border-dashed border-muted-foreground" />
         Goal {Math.round(goal).toLocaleString("en-US")} kcal
       </div>
-      <table className="sr-only">
+      {/* Hide the wrapper, not the <table>: sr-only does not clip a table, and its caption widened the page. */}
+      <div className="sr-only">
+        <table>
         <caption>Calories per day. Goal {Math.round(goal)} kcal.</caption>
         <thead>
           <tr>
@@ -108,7 +110,8 @@ export function CaloriesChart({ series, goal }: { series: SeriesDay[]; goal: num
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
     </>
   );
 }
@@ -147,7 +150,8 @@ export function MacrosChart({ averages, goals }: { averages: MacroAverages; goal
           <Bar dataKey="goal" fill="var(--color-goal)" radius={[4, 4, 0, 0]} />
         </BarChart>
       </ChartContainer>
-      <table className="sr-only">
+      <div className="sr-only">
+        <table>
         <caption>Average grams per logged day compared with your goals.</caption>
         <thead>
           <tr>
@@ -165,7 +169,8 @@ export function MacrosChart({ averages, goals }: { averages: MacroAverages; goal
             </tr>
           ))}
         </tbody>
-      </table>
+        </table>
+      </div>
     </>
   );
 }

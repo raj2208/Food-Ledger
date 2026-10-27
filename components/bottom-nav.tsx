@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, NotebookText, Apple, Target } from "lucide-react";
+import { Apple, CalendarDays, ChartColumn, NotebookText, Target } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { href: "/", label: "Log", icon: NotebookText },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
+  { href: "/insights", label: "Insights", icon: ChartColumn },
   { href: "/foods", label: "Foods", icon: Apple },
   { href: "/goals", label: "Goals", icon: Target },
 ];
@@ -21,7 +22,7 @@ export function BottomNav() {
       aria-label="Main"
       className="fixed inset-x-0 bottom-0 z-40 rounded-t-3xl bg-card pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_20px_rgba(0,0,0,0.08)]"
     >
-      <ul className="mx-auto grid max-w-2xl grid-cols-4 px-2">
+      <ul className="mx-auto grid max-w-2xl grid-cols-5 px-2">
         {TABS.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
           return (
