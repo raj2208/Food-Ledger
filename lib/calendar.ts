@@ -35,6 +35,16 @@ export function dayLabel(day: string, isToday: boolean): string {
   return `${weekday}, ${date}`;
 }
 
+// "Oct 21" for any "YYYY-MM-DD".
+export function shortDate(day: string): string {
+  const [y, m, d] = day.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 // Weeks start on Monday. Cells before the 1st and after the last day are null.
 export function buildMonthGrid(month: string): (string | null)[] {
   const [y, m] = parts(month);
