@@ -3,7 +3,7 @@ import { cache } from "react";
 import type { LogEntry } from "@/generated/prisma/client";
 import type { MealType } from "@/generated/prisma/enums";
 import { getPrisma } from "./prisma";
-import type { EntryEdit } from "./meals";
+import type { EntryEdit, RestorableEntry } from "./meals";
 import type { Food } from "./foods";
 
 export type { LogEntry, MealType };
@@ -112,6 +112,52 @@ export async function updateEntryRow(id: number, edit: EntryEdit): Promise<void>
   await getPrisma().logEntry.update({
     where: { id },
     data: { quantity: edit.quantity, meal: edit.meal },
+  });
+}
+
+export async function getEntryRow(id: number): Promise<LogEntry | null> {
+  return getPrisma().logEntry.findUnique({ where: { id } });
+}
+
+// A copy of an entry that can be sent to the browser and later restored exactly.
+export function toRestorable(e: LogEntry): RestorableEntry {
+  return {
+    id: e.id,
+    foodId: e.foodId,
+    eatenOn: e.eatenOn.toISOString().slice(0, 10),
+    meal: e.meal,
+    quantity: e.quantity,
+    foodName: e.foodName,
+    servingLabel: e.servingLabel,
+    calories: e.calories,
+    proteinG: e.proteinG,
+    carbsG: e.carbsG,
+    fatG: e.fatG,
+    createdAt: e.createdAt.toISOString(),
+  };
+}
+
+// Puts a removed entry back with its original id and times. If its food was deleted in the
+// meantime the entry comes back unlinked, which is how entries already survive a food delete.
+export async function restoreEntryRow(e: RestorableEntry): Promise<void> {
+  const prisma = getPrisma();
+  const food =
+    e.foodId === null ? null : await prisma.food.findUnique({ where: { id: e.foodId }, select: { id: true } });
+  await prisma.logEntry.create({
+    data: {
+      id: e.id,
+      foodId: food ? e.foodId : null,
+      eatenOn: dayToDate(e.eatenOn),
+      meal: e.meal,
+      quantity: e.quantity,
+      foodName: e.foodName,
+      servingLabel: e.servingLabel,
+      calories: e.calories,
+      proteinG: e.proteinG,
+      carbsG: e.carbsG,
+      fatG: e.fatG,
+      createdAt: new Date(e.createdAt),
+    },
   });
 }
 

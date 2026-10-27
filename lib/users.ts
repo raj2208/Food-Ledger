@@ -33,8 +33,3 @@ export async function updateUserRow(
     },
   });
 }
-
-// Postgres/Prisma "unique constraint failed" (P2002), e.g. an email another user already has.
-export function isUniqueViolation(e: unknown): boolean {
-  return typeof e === "object" && e !== null && "code" in e && (e as { code: unknown }).code === "P2002";
-}

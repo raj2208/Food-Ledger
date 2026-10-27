@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { fail, succeed, type ActionResult } from "@/lib/action-result";
+import { fail, isUniqueViolation, succeed, type ActionResult, type RemoveResult } from "@/lib/action-result";
 import { saveGoalsRow } from "@/lib/goals";
 import { parseFoodInput } from "@/lib/food-input";
 import { parseGoals } from "@/lib/goals-input";
@@ -11,10 +11,20 @@ import {
   insertFood,
   updateFoodRow,
 } from "@/lib/foods";
-import { deleteEntryRow, insertEntry, isMeal, isValidDay, todayLocal, updateEntryRow } from "@/lib/log";
-import { parseEntryEdit, parseQuantity } from "@/lib/meals";
+import {
+  deleteEntryRow,
+  getEntryRow,
+  insertEntry,
+  isMeal,
+  isValidDay,
+  restoreEntryRow,
+  toRestorable,
+  todayLocal,
+  updateEntryRow,
+} from "@/lib/log";
+import { parseEntryEdit, parseQuantity, parseRestorableEntry } from "@/lib/meals";
 import { parseProfile } from "@/lib/profile";
-import { getCurrentUser, isUniqueViolation, updateUserRow } from "@/lib/users";
+import { getCurrentUser, updateUserRow } from "@/lib/users";
 
 function text(formData: FormData, key: string): string {
   const v = formData.get(key);
@@ -128,7 +138,25 @@ export async function updateEntry(id: number, formData: FormData): Promise<Actio
   return succeed("Entry updated");
 }
 
-export async function deleteEntry(id: number) {
+// Returns a full copy of the removed entry so the browser can offer Undo.
+export async function removeEntry(id: number): Promise<RemoveResult> {
+  const row = await getEntryRow(id);
+  if (!row) return { ok: false, error: "That entry was already removed." };
   await deleteEntryRow(id);
   refresh();
+  return { ok: true, entry: toRestorable(row) };
+}
+
+// `raw` comes back from the browser, so it is validated like any other input.
+export async function restoreEntry(raw: unknown): Promise<ActionResult> {
+  const parsed = parseRestorableEntry(raw);
+  if (!parsed.ok) return fail(parsed.error);
+  try {
+    await restoreEntryRow(parsed.value);
+  } catch (e) {
+    if (isUniqueViolation(e)) return fail("That entry is already back.");
+    throw e;
+  }
+  refresh();
+  return succeed(`Restored ${parsed.value.foodName}`);
 }
