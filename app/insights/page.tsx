@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { CaloriesChart, MacrosChart } from "@/components/insights-charts";
 import { PageShell } from "@/components/page-shell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -148,6 +149,31 @@ async function Insights({ searchParams }: { searchParams: PageProps<"/insights">
             />
             <StatCard label="Longest streak" value={plural(streaks.longest, "day")} hint="In the past year" />
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Calories per day</CardTitle>
+              <CardDescription>
+                Green bars are within 10% of your goal; yellow are outside it.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CaloriesChart series={series} goal={goals.calories} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Macros vs goals</CardTitle>
+              <CardDescription>Your average per logged day, in grams.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MacrosChart
+                averages={{ carbsG: summary.avgCarbsG, proteinG: summary.avgProteinG, fatG: summary.avgFatG }}
+                goals={goals}
+              />
+            </CardContent>
+          </Card>
         </>
       )}
     </div>
