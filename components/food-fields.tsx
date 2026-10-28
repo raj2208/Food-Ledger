@@ -14,9 +14,23 @@ const KINDS = [
   { value: "packaged", label: "Packaged" },
 ];
 
+// Starting values for the fields: a saved food, or a prefill from a barcode lookup.
+export type FoodDefaults = Partial<
+  Pick<Food, "name" | "kind" | "servingLabel" | "calories" | "proteinG" | "carbsG" | "fatG" | "barcode" | "notes">
+>;
+
 // Meant to sit inside an <ActionForm>, which supplies the per-field error messages.
 // idPrefix keeps the field ids unique when several food forms share one page.
-export function FoodFields({ food, idPrefix }: { food?: Food; idPrefix: string }) {
+// hideBarcode: the page renders the barcode field itself (the add form puts its lookup there).
+export function FoodFields({
+  food,
+  idPrefix,
+  hideBarcode,
+}: {
+  food?: FoodDefaults;
+  idPrefix: string;
+  hideBarcode?: boolean;
+}) {
   const id = (field: string) => `${idPrefix}-${field}`;
 
   const numbers = [
@@ -78,11 +92,13 @@ export function FoodFields({ food, idPrefix }: { food?: Food; idPrefix: string }
         </Field>
       ))}
 
-      <Field className="col-span-2">
-        <FieldLabel htmlFor={id("barcode")}>Barcode (optional)</FieldLabel>
-        <FormInput id={id("barcode")} name="barcode" defaultValue={food?.barcode ?? ""} />
-        <FieldErrorMessage id={id("barcode")} name="barcode" />
-      </Field>
+      {hideBarcode ? null : (
+        <Field className="col-span-2">
+          <FieldLabel htmlFor={id("barcode")}>Barcode (optional)</FieldLabel>
+          <FormInput id={id("barcode")} name="barcode" defaultValue={food?.barcode ?? ""} />
+          <FieldErrorMessage id={id("barcode")} name="barcode" />
+        </Field>
+      )}
 
       <Field className="col-span-2 sm:col-span-4">
         <FieldLabel htmlFor={id("notes")}>Notes (optional)</FieldLabel>

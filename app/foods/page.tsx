@@ -1,7 +1,8 @@
 import { ChevronDown } from "lucide-react";
 import { Suspense } from "react";
-import { createFood, deleteFood, updateFood } from "@/app/actions";
+import { deleteFood, updateFood } from "@/app/actions";
 import { ActionForm, SubmitButton } from "@/components/action-form";
+import { AddFoodForm } from "@/components/add-food-form";
 import { DeleteFoodButton } from "@/components/delete-food-button";
 import { FoodFields } from "@/components/food-fields";
 import { PageShell } from "@/components/page-shell";
@@ -23,12 +24,7 @@ export default function FoodsPage() {
             <CardTitle>Add a food</CardTitle>
           </CardHeader>
           <CardContent>
-            <ActionForm action={createFood} successMessage="Food saved" resetOnSuccess className="flex flex-col gap-4">
-              <FoodFields idPrefix="add" />
-              <div>
-                <SubmitButton>Save food</SubmitButton>
-              </div>
-            </ActionForm>
+            <AddFoodForm />
           </CardContent>
         </Card>
 
