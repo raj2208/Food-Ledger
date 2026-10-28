@@ -7,6 +7,7 @@ import { parseFoodInput } from "@/lib/food-input";
 import { parseGoals } from "@/lib/goals-input";
 import {
   deleteFoodRow,
+  findFoodByBarcode,
   getFoodRow,
   insertFood,
   updateFoodRow,
@@ -22,6 +23,8 @@ import {
   todayLocal,
   updateEntryRow,
 } from "@/lib/log";
+import { normalizeBarcode, type LookupResult } from "@/lib/openfoodfacts";
+import { fetchProduct } from "@/lib/openfoodfacts-api";
 import { parseEntryEdit, parseQuantity, parseRestorableEntry } from "@/lib/meals";
 import { parseProfile } from "@/lib/profile";
 import { getCurrentUser, updateUserRow } from "@/lib/users";
@@ -56,6 +59,28 @@ export async function createFood(formData: FormData): Promise<ActionResult> {
   await insertFood(parsed.value);
   refresh();
   return succeed(`Saved ${parsed.value.name}`);
+}
+
+// Fills the add food form from a barcode. Your own foods win; otherwise Open Food Facts.
+// Nothing is saved here: the form shows the result and you check it before saving.
+export async function lookupBarcode(raw: string): Promise<LookupResult> {
+  const code = normalizeBarcode(typeof raw === "string" ? raw : "");
+  if (!code.ok) return { ok: false, error: code.error };
+
+  const saved = await findFoodByBarcode(code.barcode);
+  if (saved) return { ok: true, source: "saved", food: { id: saved.id, name: saved.name } };
+
+  const found = await fetchProduct(code.barcode);
+  switch (found.status) {
+    case "found":
+      return { ok: true, source: "open-food-facts", prefill: found.parsed.prefill, missing: found.parsed.missing };
+    case "not_found":
+      return { ok: false, error: "Not found on Open Food Facts. You can enter it by hand." };
+    case "rate_limited":
+      return { ok: false, error: "Too many lookups just now. Wait a minute and try again." };
+    default:
+      return { ok: false, error: "Could not reach Open Food Facts. Check your connection and try again." };
+  }
 }
 
 export async function updateFood(id: number, formData: FormData): Promise<ActionResult> {

@@ -28,3 +28,7 @@ export async function deleteFoodRow(id: number): Promise<void> {
 export async function getFoodRow(id: number): Promise<Food | null> {
   return getPrisma().food.findUnique({ where: { id } });
 }
+
+export async function findFoodByBarcode(barcode: string): Promise<Food | null> {
+  return getPrisma().food.findFirst({ where: { barcode }, orderBy: { id: "asc" } });
+}

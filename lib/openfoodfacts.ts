@@ -14,6 +14,12 @@ export type ProductPrefill = {
 
 export type ParsedProduct = { prefill: ProductPrefill; missing: string[] };
 
+// What the "look up barcode" action returns to the form.
+export type LookupResult =
+  | { ok: true; source: "open-food-facts"; prefill: ProductPrefill; missing: string[] }
+  | { ok: true; source: "saved"; food: { id: number; name: string } }
+  | { ok: false; error: string };
+
 // Digits only, 8 to 14 long (EAN-8, UPC-A, EAN-13, GTIN-14). Spaces and dashes are ignored.
 export function normalizeBarcode(raw: string): { ok: true; barcode: string } | { ok: false; error: string } {
   const cleaned = raw.replace(/[\s-]/g, "");
