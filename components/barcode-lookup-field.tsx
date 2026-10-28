@@ -94,6 +94,18 @@ export function BarcodeLookupField({
       ) : status ? (
         <FieldDescription role="status">{status.text}</FieldDescription>
       ) : null}
+      <FieldDescription>
+        Look-ups use{" "}
+        <a
+          href="https://world.openfoodfacts.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2"
+        >
+          Open Food Facts
+        </a>{" "}
+        data, shared under the ODbL licence. Anyone can edit it, so check the values.
+      </FieldDescription>
     </Field>
   );
 }
